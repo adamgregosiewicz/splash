@@ -58,44 +58,6 @@ long long blockCalc(int n, int m, int myMax){
     return myMax * blockSize + (n - m) * width + m - 2;
 }
 
-bigtype pStdCap(int n, int m, int myMax) {
-    
-    const int block = blockCalc(n,m,myMax);
-    //std::cout << n << " " << m << " " << myMax << " " << block << " ";
-    
-    if (memoize(n,m,myMax) != 0) { //std::cout << memoize(n,m,myMax) << std::endl; 
-    return memoize(n,m,myMax); }
-    if (myMax * m < n || n < m) { //std::cout << 0 << std::endl; 
-    return 0; }
-    if (myMax * m == n || n <= m + 1) { //std::cout << 1 << std::endl; 
-    return (memoize(n,m,myMax) = 1); }
-    if (m < 2) { //std::cout << m << std::endl; 
-    return (memoize(n,m,myMax) = m); }
-    
-    int niter = n / m;
-    
-    if (m == 2) {
-        if (myMax * 2 >= n) {
-            myMax = std::min(myMax, n - 1);
-            //std::cout << (niter - (n - 1 - myMax)) << std::endl;
-            return (memoize(n,m,myMax) = (niter - (n - 1 - myMax)));
-        } else {
-            //std::cout << 0 << std::endl;
-            return 0;
-        }
-    }
-    
-    bigtype count = 0;
-    //std::cout << "iter" << std::endl;
-    for (; niter--; n -= m, --myMax) {
-        count += (memoize(n-1,m-1,myMax) = pStdCap(n - 1, m - 1, myMax));
-    }
-    
-    memoize(n,m,myMax) = count;
-    //std::cout << count << std::endl;
-    return count;
-}
-
 bigtype CountPartLenCap(int n, int m, int myMax) {
     
     const int block = blockCalc(n,m,myMax);
@@ -115,9 +77,14 @@ bigtype CountPartLenCap(int n, int m, int myMax) {
             return 0;
         }
     }
+
+    bigtype count = 0;
+    int niter = n / m;
+    for (; niter--; n -= m, --myMax) {
+        count += (memoize(n-1,m-1,myMax) = CountPartLenCap(n - 1, m - 1, myMax));
+    }
     
-    memoize(n,m,myMax) = pStdCap(n, m, myMax);
-    return memoize(n,m,myMax);
+    return (memoize(n,m,myMax) = count);
 }
 
 
@@ -159,10 +126,11 @@ int main() {
 
     width = m;
     blockSize = m * (n - m + 1);
-    memoize = vector3d<bigtype>(nnmax,mmmax,kkmax, 0);
+    //memoize = vector3d<bigtype>(nnmax,mmmax,kkmax, 0);
+    memoize = vector3d<bigtype>(100,20,50, 0);
     
     std::vector<bigtype> sums;
-    sums = std::vector<bigtype>(15000, 0);
+    //sums = std::vector<bigtype>(15000, 0);
     //return 0;
     /*memoize.resize(nnmax+1);
     for(int i = 0; i <= nnmax; i++)
@@ -178,7 +146,10 @@ int main() {
     
     //std::cout << CountPartLenCap(n, 101, 50) << std::endl;
     //std::cout << CountPartLenCap(n, 100, 50) << std::endl;
-    //return 0;    
+    //return 0;
+
+    std::cout << CountPartLenCap(80, 15, 60) << std::endl;
+    return 0;
     
     /*mpz_int a=1;
     
