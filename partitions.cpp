@@ -31,22 +31,73 @@ typedef uint512_t bigtype;
 
 template <typename T>
 class vector3d {
-public:
-    vector3d(size_t d1=0, size_t d2=0, size_t d3=0, T const & t=T()) :
-        d1(d1), d2(d2), d3(d3), data(d1*d2*d3, t)
-    {}
+    public:
+        vector3d(size_t d1 = 0, size_t d2 = 0, size_t d3 = 0, T const & t = T()) :
+            d1(d1), d2(d2), d3(d3), data(d1 * d2 * d3, t)
+        {}
 
-    T & operator()(size_t i, size_t j, size_t k) {
-        return data[i*d2*d3 + j*d3 + k];
-    }
+        T & operator()(size_t i, size_t j, size_t k) {
+            return data[i * d2 * d3 + j * d3 + k];
+        }
 
-    T const & operator()(size_t i, size_t j, size_t k) const {
-        return data[i*d2*d3 + j*d3 + k];
-    }
+        T const & operator()(size_t i, size_t j, size_t k) const {
+            return data[i* d2 * d3 + j * d3 + k];
+        }
 
-private:
-    size_t d1,d2,d3;
-    std::vector<T> data;
+    private:
+        size_t d1, d2, d3;
+        std::vector<T> data;
+};
+
+class Partitions {
+    public:
+        vector3d<bigtype> P;
+
+        Partitions(size_t maxNumber, size_t maxPartsNumber, size_t maxPartSize) {
+            P = vector3d<bigtype>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
+        }
+
+        bigtype numberOfPartitions(size_t number, size_t parts, size_t maxPart) {
+        // Count the number of partitions of the number into parts parts with restrictions
+        // on each part to be at least 1 and at most maxPart
+
+            // already counted
+            if (P(number, parts, maxPart) != 0)
+                return P(number, parts, maxPart);
+            
+            // partition is impossible, the number is too large or too small
+            if (maxPart * parts < number || number < parts) 
+                return 0;
+
+            // only one possibility: all ones or all maxPart
+            if (maxPart * parts == number || number <= parts + 1)
+                return (P(number, parts, maxPart) = 1);
+            
+            if (parts == 1)
+                return (P(number, parts, maxPart) = 1);
+            
+            if (parts == 2) {
+                if (maxPart * 2 >= number) {
+                    // partition is possible
+                    maxPart = std::min(maxPart, number - 1);
+                    return (P(number, parts, maxPart) = number / parts - (number - 1 - maxPart));
+                } else {
+                    return 0;
+                }
+            }
+
+            bigtype count = 0;
+            size_t iterNum = number / parts;
+            for (size_t i = 0; i < iterNum; ++i)
+            //for (; iterNum--; number -= parts, --maxPart)
+            {
+                count += (P(number-1, parts-1, maxPart) = numberOfPartitions(number - 1, parts - 1, maxPart));
+                number -= parts;
+                --maxPart;
+            }
+            
+            return (P(number,parts,maxPart) = count);
+        }
 };
 
 int width;
@@ -60,8 +111,7 @@ long long blockCalc(int n, int m, int myMax){
 
 bigtype CountPartLenCap(int n, int m, int myMax) {
     
-    const int block = blockCalc(n,m,myMax);
-    //std::cout << n << " " << m << " " << myMax << " " << block << std::endl;
+    //const int block = myMax * blockSize + (n - m) * width + m - 2;
     
     if (memoize(n,m,myMax) != 0) return memoize(n,m,myMax);    
     
@@ -148,7 +198,10 @@ int main() {
     //std::cout << CountPartLenCap(n, 100, 50) << std::endl;
     //return 0;
 
-    std::cout << CountPartLenCap(80, 15, 60) << std::endl;
+    std::cout << CountPartLenCap(80, 20, 60) << std::endl;
+
+    Partitions P = Partitions(80, 20, 60);
+    std::cout << P.numberOfPartitions(80, 20, 60) << std::endl;
     return 0;
     
     /*mpz_int a=1;
