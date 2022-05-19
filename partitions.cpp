@@ -98,6 +98,10 @@ class Partitions {
             
             return (P(number,parts,maxPart) = count);
         }
+
+        bigtype numberOfPartitions(size_t number, size_t parts, size_t minPart, size_t maxPart) {
+            return numberOfPartitions(number - parts * (minPart - 1), parts, maxPart - minPart + 1);
+        }
 };
 
 int width;
@@ -202,6 +206,8 @@ int main() {
 
     Partitions P = Partitions(80, 20, 60);
     std::cout << P.numberOfPartitions(80, 20, 60) << std::endl;
+    std::cout << P.numberOfPartitions(80, 15, 60) << std::endl;
+    std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
     return 0;
     
     /*mpz_int a=1;
