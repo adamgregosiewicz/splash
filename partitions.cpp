@@ -161,27 +161,45 @@ std::vector<bigFloat> calculateNormalDiscrete(double mean, double std, double mi
     return probabilities;
 }
 
+struct Parameters {
+    int eMean;
+    double eStd;
+    double eMin;
+    double eMax;
+    int eMinDiscrete;
+    int eMaxDiscrete;
+    int numPartMin;
+    int numPartMax;
+    int numMin;
+    int numMax;
+
+    Parameters(char* argv[]) {
+        int eMean = atoi(argv[1]);
+        double eStd = atof(argv[2]);
+        double eMin = atof(argv[3]);
+        double eMax = atof(argv[4]);
+        int numPartMin = atoi(argv[5]);
+        int numPartMax = atoi(argv[6]);
+        int numMin = atoi(argv[7]);
+        int numMax = atoi(argv[8]);
+
+        int eMinDiscrete = ceil(eMin);
+        int eMaxDiscrete = floor(eMin);
+    };
+};
+
 
 int main(int argc, char* argv[]) {
 
     if(argc != 9) {
         std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax numPartMin numPartMax numMin numMax" << std::endl;
+        return 0;
     }
 
-    int eMean = atoi(argv[1]);
-    double eStd = atof(argv[2]);
-    double eMin = atof(argv[3]);
-    double eMax = atof(argv[4]);
-    int numPartMin = atoi(argv[5]);
-    int numPartMax = atoi(argv[6]);
-    int numMin = atoi(argv[7]);
-    int numMax = atoi(argv[8]);
-
-    int eMinDiscrete = ceil(eMin);
-    int eMaxDiscrete = floor(eMin);
+    Parameters Params = Parameters(argv);
 
     std::vector<bigFloat> probabilitiesNormalDiscrete;
-    probabilitiesNormalDiscrete = calculateNormalDiscrete(eMean, eStd, eMin, eMax);
+    probabilitiesNormalDiscrete = calculateNormalDiscrete(Params.eMean, Params.eStd, Params.eMin, Params.eMax);
 
     int n,nlow,m,low,up,myMax;
     //std::cin >> n >> m >> low >> up;
