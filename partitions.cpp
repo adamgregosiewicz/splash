@@ -141,7 +141,23 @@ bigInt CountPartLenCap(int n, int m, int myMax) {
 }
 
 
-int main() {
+int main(int argc, char* argv[]) {
+
+    if(argc != 9) {
+        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax numPartMin numPartMax numMin numMax" << std::endl;
+    }
+
+    int eMean = atoi(argv[2]);
+    double eStd = atof(argv[3]);
+    double eMin = atof(argv[4]);
+    double eMax = atof(argv[5]);
+    int numPartMin = atoi(argv[6]);
+    int numPartMax = atoi(argv[7]);
+    int numMin = atoi(argv[8]);
+    int numMax = atoi(argv[9]);
+
+    int eMinDiscrete = floor(eMin);
+    int eMaxDiscrete = ceil(eMin);
 	
 	int minn = mNmin;
     int maxn = mNmax;
