@@ -57,30 +57,30 @@ class Partitions {
             partitionsMatrix = vector3d<bigInt>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
         }
 
-        bigInt numberOfPartitions(size_t number, size_t parts, size_t maxPart) {
+        bigInt numberOfPartitions(size_t number, size_t parts, size_t partMax) {
         // Count the number of partitions of the number into parts parts with restrictions
-        // on each part to be at least 1 and at most maxPart
+        // on each part to be at least 1 and at most partMax
 
             // already counted
-            if (partitionsMatrix(number, parts, maxPart) != 0)
-                return partitionsMatrix(number, parts, maxPart);
+            if (partitionsMatrix(number, parts, partMax) != 0)
+                return partitionsMatrix(number, parts, partMax);
             
             // partition is impossible, the number is too large or too small
-            if (maxPart * parts < number || number < parts) 
+            if (partMax * parts < number || number < parts) 
                 return 0;
 
-            // only one possibility: all ones or all maxPart
-            if (maxPart * parts == number || number <= parts + 1)
-                return (partitionsMatrix(number, parts, maxPart) = 1);
+            // only one possibility: all ones or all partMax
+            if (partMax * parts == number || number <= parts + 1)
+                return (partitionsMatrix(number, parts, partMax) = 1);
             
             if (parts == 1)
-                return (partitionsMatrix(number, parts, maxPart) = 1);
+                return (partitionsMatrix(number, parts, partMax) = 1);
             
             if (parts == 2) {
-                if (maxPart * 2 >= number) {
+                if (partMax * 2 >= number) {
                     // partition is possible
-                    maxPart = std::min(maxPart, number - 1);
-                    return (partitionsMatrix(number, parts, maxPart) = number / parts - (number - 1 - maxPart));
+                    partMax = std::min(partMax, number - 1);
+                    return (partitionsMatrix(number, parts, partMax) = number / parts - (number - 1 - partMax));
                 } else {
                     return 0;
                 }
@@ -90,16 +90,16 @@ class Partitions {
             bigInt count = 0;
             size_t iterNum = number / parts;
             for (size_t i = 0; i < iterNum; ++i) {
-                count += (partitionsMatrix(number-1, parts-1, maxPart) = numberOfPartitions(number - 1, parts - 1, maxPart));
+                count += (partitionsMatrix(number-1, parts-1, partMax) = numberOfPartitions(number - 1, parts - 1, partMax));
                 number -= parts;
-                --maxPart;
+                --partMax;
             }
             
-            return (partitionsMatrix(number,parts,maxPart) = count);
+            return (partitionsMatrix(number,parts,partMax) = count);
         }
 
-        bigInt numberOfPartitions(size_t number, size_t parts, size_t minPart, size_t maxPart) {
-            return numberOfPartitions(number - parts * (minPart - 1), parts, maxPart - minPart + 1);
+        bigInt numberOfPartitions(size_t number, size_t parts, size_t partMin, size_t partMax) {
+            return numberOfPartitions(number - parts * (partMin - 1), parts, partMax - partMin + 1);
         }
 };
 
@@ -178,21 +178,19 @@ struct Parameters {
         double eStd = atof(argv[2]);
         double eMin = atof(argv[3]);
         double eMax = atof(argv[4]);
-        int numPartMin = atoi(argv[5]);
-        int numPartMax = atoi(argv[6]);
-        int partMin = atoi(argv[7]);
-        int partMax = atoi(argv[8]);
+        int partMin = atoi(argv[5]);
+        int partMax = atoi(argv[6]);
 
         int eMinDiscrete = ceil(eMin);
-        int eMaxDiscrete = floor(eMin);
+        int eMaxDiscrete = floor(eMax);
     };
 };
 
 
 int main(int argc, char* argv[]) {
 
-    if(argc != 9) {
-        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax numPartMin numPartMax partMin partMax" << std::endl;
+    if(argc != 7) {
+        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax partMin partMax" << std::endl;
         return 0;
     }
 
@@ -222,6 +220,7 @@ int main(int argc, char* argv[]) {
     memoize = vector3d<bigInt>(100,20,50, 0);
     
     std::vector<bigInt> sums;
+    std::vector<bigInt> sumsPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
     //sums = std::vector<bigInt>(15000, 0);
     //return 0;
     /*memoize.resize(nnmax+1);
@@ -253,12 +252,10 @@ int main(int argc, char* argv[]) {
     for(int i=1;i<10;i++) a *= i;
     std::cout << a << std::endl;*/
     //std::cout << CountPartLenCap(n, 101, 50) << std::endl;
-    for(int i = nlow; i <= n; i++) {
-		if(i%1000 == 0) std::cout << i << std::endl;
-        for(int j = (int)ceil(i/(double)kmax); j <= i/kmin; j++){
-			int nn = i-j*(kmin-1);
-			int mmax = kmax-(kmin-1);
-			sums[i] += CountPartLenCap(nn,j,mmax);
+    for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
+		if(energy % 1000 == 0) std::cout << energy << std::endl;
+        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts){
+            sumsPartitions[energy] = P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax);
 		}
 	}
 	
