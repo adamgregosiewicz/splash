@@ -49,9 +49,10 @@ class vector3d {
 };
 
 class Partitions {
-    public:
+    private:
         vector3d<bigInt> P;
 
+    public:
         Partitions(size_t maxNumber, size_t maxPartsNumber, size_t maxPartSize) {
             P = vector3d<bigInt>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
         }
