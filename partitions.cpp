@@ -25,9 +25,8 @@ using boost::multiprecision::cpp_dec_float_50;
 #define kjmin 113
 #define kjmax 288
 
-using namespace boost::multiprecision;
-
-typedef uint512_t bigtype;
+typedef boost::multiprecision::uint512_t bigInt;
+typedef boost::multiprecision::cpp_dec_float_100 bigFloat;
 
 template <typename T>
 class vector3d {
@@ -51,13 +50,13 @@ class vector3d {
 
 class Partitions {
     public:
-        vector3d<bigtype> P;
+        vector3d<bigInt> P;
 
         Partitions(size_t maxNumber, size_t maxPartsNumber, size_t maxPartSize) {
-            P = vector3d<bigtype>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
+            P = vector3d<bigInt>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
         }
 
-        bigtype numberOfPartitions(size_t number, size_t parts, size_t maxPart) {
+        bigInt numberOfPartitions(size_t number, size_t parts, size_t maxPart) {
         // Count the number of partitions of the number into parts parts with restrictions
         // on each part to be at least 1 and at most maxPart
 
@@ -86,7 +85,7 @@ class Partitions {
                 }
             }
 
-            bigtype count = 0;
+            bigInt count = 0;
             size_t iterNum = number / parts;
             for (size_t i = 0; i < iterNum; ++i)
             //for (; iterNum--; number -= parts, --maxPart)
@@ -99,21 +98,21 @@ class Partitions {
             return (P(number,parts,maxPart) = count);
         }
 
-        bigtype numberOfPartitions(size_t number, size_t parts, size_t minPart, size_t maxPart) {
+        bigInt numberOfPartitions(size_t number, size_t parts, size_t minPart, size_t maxPart) {
             return numberOfPartitions(number - parts * (minPart - 1), parts, maxPart - minPart + 1);
         }
 };
 
 int width;
 long long blockSize;
-static vector3d<bigtype> memoize;
-//static std::vector<std::vector<std::vector<bigtype>>> memoize;
+static vector3d<bigInt> memoize;
+//static std::vector<std::vector<std::vector<bigInt>>> memoize;
 
 long long blockCalc(int n, int m, int myMax){
     return myMax * blockSize + (n - m) * width + m - 2;
 }
 
-bigtype CountPartLenCap(int n, int m, int myMax) {
+bigInt CountPartLenCap(int n, int m, int myMax) {
     
     //const int block = myMax * blockSize + (n - m) * width + m - 2;
     
@@ -132,7 +131,7 @@ bigtype CountPartLenCap(int n, int m, int myMax) {
         }
     }
 
-    bigtype count = 0;
+    bigInt count = 0;
     int niter = n / m;
     for (; niter--; n -= m, --myMax) {
         count += (memoize(n-1,m-1,myMax) = CountPartLenCap(n - 1, m - 1, myMax));
@@ -147,10 +146,10 @@ int main() {
 	int minn = mNmin;
     int maxn = mNmax;
     
-    std::vector<cpp_dec_float_100> normProb;
-    normProb = std::vector<cpp_dec_float_100>(15000, 0);
+    std::vector<bigFloat> normProb;
+    normProb = std::vector<bigFloat>(15000, 0);
     
-    cpp_dec_float_100 sum = 0.0;
+    bigFloat sum = 0.0;
     
     for(int i=minn; i<=maxn; i++) {
 	    boost::math::normal norm(10000,2674.377);
@@ -180,11 +179,11 @@ int main() {
 
     width = m;
     blockSize = m * (n - m + 1);
-    //memoize = vector3d<bigtype>(nnmax,mmmax,kkmax, 0);
-    memoize = vector3d<bigtype>(100,20,50, 0);
+    //memoize = vector3d<bigInt>(nnmax,mmmax,kkmax, 0);
+    memoize = vector3d<bigInt>(100,20,50, 0);
     
-    std::vector<bigtype> sums;
-    //sums = std::vector<bigtype>(15000, 0);
+    std::vector<bigInt> sums;
+    //sums = std::vector<bigInt>(15000, 0);
     //return 0;
     /*memoize.resize(nnmax+1);
     for(int i = 0; i <= nnmax; i++)
@@ -233,18 +232,18 @@ int main() {
 	std::cout << CountPartLenCap(nnn-50*111, 50, 244-111) << std::endl;
 	std::cout << sums[6000] << std::endl;
 	
-	std::cout << std::setprecision(50) << (cpp_dec_float_100)CountPartLenCap(nnn-50*111,50,244-111)/(cpp_dec_float_100)sums[6000] << std::endl;
+	std::cout << std::setprecision(50) << (bigFloat)CountPartLenCap(nnn-50*111,50,244-111)/(bigFloat)sums[6000] << std::endl;
 	//return 0;
 
-    std::vector<cpp_dec_float_100> prob;
-    prob = std::vector<cpp_dec_float_100>(15000, 0);
+    std::vector<bigFloat> prob;
+    prob = std::vector<bigFloat>(15000, 0);
 
     for(int i = nlow; i <= n; i++) {
 		if(i%1000 == 0) std::cout << i << std::endl;
         for(int j = (int)ceil(i/(double)kmax); j <= i/kmin; j++){
 			int nn = i-j*(kmin-1);
 			int mmax = kmax-(kmin-1);
-			prob[j] += (cpp_dec_float_100)CountPartLenCap(nn,j,mmax)/(cpp_dec_float_100)sums[i] * normProb[i] / sum;
+			prob[j] += (bigFloat)CountPartLenCap(nn,j,mmax)/(bigFloat)sums[i] * normProb[i] / sum;
 		}
 	}
 	
