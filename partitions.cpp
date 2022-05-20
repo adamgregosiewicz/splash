@@ -50,11 +50,11 @@ class vector3d {
 
 class Partitions {
     private:
-        vector3d<bigInt> P;
+        vector3d<bigInt> partitionsMatrix;
 
     public:
         Partitions(size_t maxNumber, size_t maxPartsNumber, size_t maxPartSize) {
-            P = vector3d<bigInt>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
+            partitionsMatrix = vector3d<bigInt>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
         }
 
         bigInt numberOfPartitions(size_t number, size_t parts, size_t maxPart) {
@@ -62,8 +62,8 @@ class Partitions {
         // on each part to be at least 1 and at most maxPart
 
             // already counted
-            if (P(number, parts, maxPart) != 0)
-                return P(number, parts, maxPart);
+            if (partitionsMatrix(number, parts, maxPart) != 0)
+                return partitionsMatrix(number, parts, maxPart);
             
             // partition is impossible, the number is too large or too small
             if (maxPart * parts < number || number < parts) 
@@ -71,16 +71,16 @@ class Partitions {
 
             // only one possibility: all ones or all maxPart
             if (maxPart * parts == number || number <= parts + 1)
-                return (P(number, parts, maxPart) = 1);
+                return (partitionsMatrix(number, parts, maxPart) = 1);
             
             if (parts == 1)
-                return (P(number, parts, maxPart) = 1);
+                return (partitionsMatrix(number, parts, maxPart) = 1);
             
             if (parts == 2) {
                 if (maxPart * 2 >= number) {
                     // partition is possible
                     maxPart = std::min(maxPart, number - 1);
-                    return (P(number, parts, maxPart) = number / parts - (number - 1 - maxPart));
+                    return (partitionsMatrix(number, parts, maxPart) = number / parts - (number - 1 - maxPart));
                 } else {
                     return 0;
                 }
@@ -90,12 +90,12 @@ class Partitions {
             bigInt count = 0;
             size_t iterNum = number / parts;
             for (size_t i = 0; i < iterNum; ++i) {
-                count += (P(number-1, parts-1, maxPart) = numberOfPartitions(number - 1, parts - 1, maxPart));
+                count += (partitionsMatrix(number-1, parts-1, maxPart) = numberOfPartitions(number - 1, parts - 1, maxPart));
                 number -= parts;
                 --maxPart;
             }
             
-            return (P(number,parts,maxPart) = count);
+            return (partitionsMatrix(number,parts,maxPart) = count);
         }
 
         bigInt numberOfPartitions(size_t number, size_t parts, size_t minPart, size_t maxPart) {
