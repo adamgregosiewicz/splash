@@ -86,11 +86,10 @@ class Partitions {
                 }
             }
 
+            // real counting, use a formula from the paper
             bigInt count = 0;
             size_t iterNum = number / parts;
-            for (size_t i = 0; i < iterNum; ++i)
-            //for (; iterNum--; number -= parts, --maxPart)
-            {
+            for (size_t i = 0; i < iterNum; ++i) {
                 count += (P(number-1, parts-1, maxPart) = numberOfPartitions(number - 1, parts - 1, maxPart));
                 number -= parts;
                 --maxPart;
