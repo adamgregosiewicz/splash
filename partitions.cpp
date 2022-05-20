@@ -140,6 +140,27 @@ bigInt CountPartLenCap(int n, int m, int myMax) {
     return (memoize(n,m,myMax) = count);
 }
 
+std::vector<bigFloat> calculateNormalDiscrete(double mean, double std, double min, double max) {
+
+    int minCeil = ceil(min);
+    int maxFloor = floor(max);
+
+    std::vector<bigFloat> probabilities;
+    probabilities = std::vector<bigFloat>(maxFloor + 1, 0);
+    
+    boost::math::normal normal(mean,std);
+    double normalization = cdf(normal, max) - cdf(normal, min);
+
+    probabilities[minCeil] = cdf(normal, minCeil + 0.5) - cdf(normal, min);
+    probabilities[maxFloor] = cdf(normal, max) - cdf(normal, maxFloor - 0.5);
+
+    for(int i = minCeil + 1; i < maxFloor; ++i) {
+	    probabilities[i] = (cdf(normal, i + 0.5) - cdf(normal, i - 0.5)) / normalization;
+    }
+
+    return probabilities;
+}
+
 
 int main(int argc, char* argv[]) {
 
@@ -147,36 +168,20 @@ int main(int argc, char* argv[]) {
         std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax numPartMin numPartMax numMin numMax" << std::endl;
     }
 
-    int eMean = atoi(argv[2]);
-    double eStd = atof(argv[3]);
-    double eMin = atof(argv[4]);
-    double eMax = atof(argv[5]);
-    int numPartMin = atoi(argv[6]);
-    int numPartMax = atoi(argv[7]);
-    int numMin = atoi(argv[8]);
-    int numMax = atoi(argv[9]);
+    int eMean = atoi(argv[1]);
+    double eStd = atof(argv[2]);
+    double eMin = atof(argv[3]);
+    double eMax = atof(argv[4]);
+    int numPartMin = atoi(argv[5]);
+    int numPartMax = atoi(argv[6]);
+    int numMin = atoi(argv[7]);
+    int numMax = atoi(argv[8]);
 
-    int eMinDiscrete = floor(eMin);
-    int eMaxDiscrete = ceil(eMin);
-	
-	int minn = mNmin;
-    int maxn = mNmax;
-    
-    std::vector<bigFloat> normProb;
-    normProb = std::vector<bigFloat>(15000, 0);
-    
-    bigFloat sum = 0.0;
-    
-    for(int i=minn; i<=maxn; i++) {
-	    boost::math::normal norm(10000,2674.377);
-	    normProb[i] = cdf(norm, i+0.5)-cdf(norm, i-0.5);
-	    sum += normProb[i];
-    }
-    
-    std::cout << std::setprecision(20) << normProb[6000] << std::endl;
-    std::cout << std::setprecision(50) << sum << std::endl;
-    
-    //return 0;
+    int eMinDiscrete = ceil(eMin);
+    int eMaxDiscrete = floor(eMin);
+
+    std::vector<bigFloat> probabilitiesNormalDiscrete;
+    probabilitiesNormalDiscrete = calculateNormalDiscrete(eMean, eStd, eMin, eMax);
 
     int n,nlow,m,low,up,myMax;
     //std::cin >> n >> m >> low >> up;
@@ -259,7 +264,7 @@ int main(int argc, char* argv[]) {
         for(int j = (int)ceil(i/(double)kmax); j <= i/kmin; j++){
 			int nn = i-j*(kmin-1);
 			int mmax = kmax-(kmin-1);
-			prob[j] += (bigFloat)CountPartLenCap(nn,j,mmax)/(bigFloat)sums[i] * normProb[i] / sum;
+			prob[j] += (bigFloat)CountPartLenCap(nn,j,mmax)/(bigFloat)sums[i] * probabilitiesNormalDiscrete[i];
 		}
 	}
 	
