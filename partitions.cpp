@@ -220,24 +220,7 @@ int main(int argc, char* argv[]) {
     memoize = vector3d<bigInt>(100,20,50, 0);
     
     std::vector<bigInt> sums;
-    std::vector<bigInt> sumsPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
-    //sums = std::vector<bigInt>(15000, 0);
-    //return 0;
-    /*memoize.resize(nnmax+1);
-    for(int i = 0; i <= nnmax; i++)
-    {
-        memoize[i].resize(mmmax+1);
-        for(int j = 0; j <= mmmax; j++)
-            memoize[i][j].resize(kkmax+1);
-    }*/
-    /*for(int i=0;i<=nnmax;i++)
-        for(int j=0;j<=mmmax;j++)
-            for(int k=0;k<=kkmax;k++)
-                memoize[i][j][k] = 0;*/
-    
-    //std::cout << CountPartLenCap(n, 101, 50) << std::endl;
-    //std::cout << CountPartLenCap(n, 100, 50) << std::endl;
-    //return 0;
+    std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
 
     std::cout << CountPartLenCap(80, 20, 60) << std::endl;
 
@@ -247,15 +230,11 @@ int main(int argc, char* argv[]) {
     std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
     return 0;
     
-    /*mpz_int a=1;
-    
-    for(int i=1;i<10;i++) a *= i;
-    std::cout << a << std::endl;*/
-    //std::cout << CountPartLenCap(n, 101, 50) << std::endl;
+
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
         for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts){
-            sumsPartitions[energy] = P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax);
+            sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax);
 		}
 	}
 	
