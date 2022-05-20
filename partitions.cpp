@@ -170,8 +170,8 @@ struct Parameters {
     int eMaxDiscrete;
     int numPartMin;
     int numPartMax;
-    int numMin;
-    int numMax;
+    int partMin;
+    int partMax;
 
     Parameters(char* argv[]) {
         int eMean = atoi(argv[1]);
@@ -180,8 +180,8 @@ struct Parameters {
         double eMax = atof(argv[4]);
         int numPartMin = atoi(argv[5]);
         int numPartMax = atoi(argv[6]);
-        int numMin = atoi(argv[7]);
-        int numMax = atoi(argv[8]);
+        int partMin = atoi(argv[7]);
+        int partMax = atoi(argv[8]);
 
         int eMinDiscrete = ceil(eMin);
         int eMaxDiscrete = floor(eMin);
@@ -192,7 +192,7 @@ struct Parameters {
 int main(int argc, char* argv[]) {
 
     if(argc != 9) {
-        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax numPartMin numPartMax numMin numMax" << std::endl;
+        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax numPartMin numPartMax partMin partMax" << std::endl;
         return 0;
     }
 
