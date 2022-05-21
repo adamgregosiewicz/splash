@@ -253,22 +253,20 @@ int main(int argc, char* argv[]) {
 	std::cout << std::setprecision(50) << (bigFloat)CountPartLenCap(nnn-50*111,50,244-111)/(bigFloat)sums[6000] << std::endl;
 	//return 0;
 
-    std::vector<bigFloat> prob;
-    prob = std::vector<bigFloat>(15000, 0);
+    std::vector<bigFloat> probabilitiesPartitions(Params.eMaxDiscrete + 1, 0);
 
-    for(int i = nlow; i <= n; i++) {
-		if(i%1000 == 0) std::cout << i << std::endl;
-        for(int j = (int)ceil(i/(double)kmax); j <= i/kmin; j++){
-			int nn = i-j*(kmin-1);
-			int mmax = kmax-(kmin-1);
-			prob[j] += (bigFloat)CountPartLenCap(nn,j,mmax)/(bigFloat)sums[i] * probabilitiesNormalDiscrete[i];
+    for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
+		if(energy % 1000 == 0) std::cout << energy << std::endl;
+        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts){
+			probabilitiesPartitions[j] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax)/(bigFloat)sumsOfPartitions[i]
+                       * probabilitiesNormalDiscrete[i];
 		}
 	}
 	
 	std::cout << nimin << " " << nimax << std::endl;
 	for(int i = nimin; i <= nimax; i++)
-		//std::cout << i << "," << std::setprecision(10) << prob[i] << std::endl;
-		std::cout << std::setprecision(10) << prob[i] << std::endl;
+		//std::cout << i << "," << std::setprecision(10) << probabilitiesPartitions[i] << std::endl;
+		std::cout << std::setprecision(10) << probabilitiesPartitions[i] << std::endl;
 	//return 0;
             
     /*std::cout << CountPartLenCap(10, 7, 10) << std::endl;
