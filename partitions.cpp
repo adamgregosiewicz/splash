@@ -2,18 +2,11 @@
 #include <algorithm>
 #include <iostream>
 #include <cmath>
-//#include <gmpxx.h>
-//#include <cln/integer.h>
-//#include <cln/real.h>
-//using namespace cln;
 #include <boost/multiprecision/cpp_int.hpp>
-//#include "uint256_t.h"
-
-#include <boost/multiprecision/cpp_dec_float.hpp> 
-#include <boost/math/constants/constants.hpp> 
+#include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/math/distributions/normal.hpp>
 
-using namespace boost::math;
+
 using boost::multiprecision::cpp_dec_float_50;
 
 typedef boost::multiprecision::uint512_t bigInt;
