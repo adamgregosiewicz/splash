@@ -231,12 +231,9 @@ int main(int argc, char* argv[]) {
     std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
     //return 0;
 
-    std::cout << Params.numPartMin << " " << Params.numPartMax << std::endl;
-    return 0;
-
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts){
+        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts) {
             sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax);
 		}
 	}
@@ -257,16 +254,18 @@ int main(int argc, char* argv[]) {
 
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts){
-			probabilitiesPartitions[j] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax)/(bigFloat)sumsOfPartitions[i]
-                       * probabilitiesNormalDiscrete[i];
+        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts) {
+			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax)
+                                              / (bigFloat)sumsOfPartitions[energy]
+                                              * probabilitiesNormalDiscrete[energy];
 		}
 	}
+
+    std::cout << Params.numPartMin << " " << Params.numPartMax << std::endl;
 	
-	std::cout << nimin << " " << nimax << std::endl;
-	for(int i = nimin; i <= nimax; i++)
-		//std::cout << i << "," << std::setprecision(10) << probabilitiesPartitions[i] << std::endl;
-		std::cout << std::setprecision(10) << probabilitiesPartitions[i] << std::endl;
+	for(int parts = Params.numPartMin; parts <= Params.numPartMax; ++parts)
+		std::cout << parts << "," << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
+		//std::cout << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
 	//return 0;
             
     /*std::cout << CountPartLenCap(10, 7, 10) << std::endl;
