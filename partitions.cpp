@@ -34,8 +34,8 @@ class Partitions {
         vector3d<bigInt> partitionsMatrix;
 
     public:
-        Partitions(size_t maxNumber, size_t partsCardMax, size_t partSizeMax) {
-            partitionsMatrix = vector3d<bigInt>(maxNumber + 1, partsCardMax + 1, partSizeMax + 1, 0);
+        Partitions(size_t maxNumber, size_t numPartsMax, size_t partSizeMax) {
+            partitionsMatrix = vector3d<bigInt>(maxNumber + 1, numPartsMax + 1, partSizeMax + 1, 0);
         }
 
         bigInt numberOfPartitions(size_t number, size_t parts, size_t partSizeMax) {
@@ -71,7 +71,7 @@ class Partitions {
             bigInt count = 0;
             size_t iterNum = number / parts;
             for (size_t i = 0; i < iterNum; ++i) {
-                count += (partitionsMatrix(number-1, parts-1, partSizeMax) = numberOfPartitions(number - 1, parts - 1, partSizeMax));
+                count += (partitionsMatrix(number - 1, parts - 1, partSizeMax) = numberOfPartitions(number - 1, parts - 1, partSizeMax));
                 number -= parts;
                 --partSizeMax;
             }
@@ -114,22 +114,22 @@ struct Parameters {
     double eMax;
     int eMinDiscrete;
     int eMaxDiscrete;
-    int numPartMin;
-    int numPartMax;
-    int partMin;
-    int partMax;
+    int numPartsMin;
+    int numPartsMax;
+    int partSizeMin;
+    int partSizeMax;
 
     Parameters(char* argv[]) {
         eMean = atoi(argv[1]);
         eStd = atof(argv[2]);
         eMin = atof(argv[3]);
         eMax = atof(argv[4]);
-        partMin = atoi(argv[5]);
-        partMax = atoi(argv[6]);
+        partSizeMin = atoi(argv[5]);
+        partSizeMax = atoi(argv[6]);
         eMinDiscrete = (int)ceil(eMin);
         eMaxDiscrete = (int)floor(eMax);
-        numPartMin = (size_t)ceil(eMinDiscrete / (double)partMax);
-        numPartMax = (size_t)floor(eMaxDiscrete / (double)partMin);
+        numPartsMin = (size_t)ceil(eMinDiscrete / (double)partSizeMax);
+        numPartsMax = (size_t)floor(eMaxDiscrete / (double)partSizeMin);
     };
 };
 
@@ -137,7 +137,7 @@ struct Parameters {
 int main(int argc, char* argv[]) {
 
     if(argc != 7) {
-        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax partMin partMax" << std::endl;
+        std::cout << "Execution: ./partitions energyMean energyStd energyMin energyMax partSizeMin partSizeMax" << std::endl;
         return 0;
     }
 
@@ -148,17 +148,17 @@ int main(int argc, char* argv[]) {
 
     std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
 
-    Partitions P = Partitions(80, 20, 60);
+    Partitions P(80, 20, 60);
     std::cout << P.numberOfPartitions(80, 20, 60) << std::endl;
     std::cout << P.numberOfPartitions(80, 15, 60) << std::endl;
     std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
-    //return 0;
+    return 0;
 
     // calculate partitions
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts) {
-            sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax);
+        for(int parts = (int)ceil(energy / (double)Params.partSizeMax); parts <= energy / Params.partSizeMin; ++parts) {
+            sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partSizeMin, Params.partSizeMax);
 		}
 	}
 
@@ -167,17 +167,17 @@ int main(int argc, char* argv[]) {
     // calculate distribution
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts) {
-			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax)
+        for(int parts = (int)ceil(energy / (double)Params.partSizeMax); parts <= energy / Params.partSizeMin; ++parts) {
+			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partSizeMin, Params.partSizeMax)
                                               / (bigFloat)sumsOfPartitions[energy]
                                               * probabilitiesNormalDiscrete[energy];
 		}
 	}
 
     // print distribution
-    std::cout << Params.numPartMin << " " << Params.numPartMax << std::endl;
+    std::cout << Params.numPartsMin << " " << Params.numPartsMax << std::endl;
 	
-	for(int parts = Params.numPartMin; parts <= Params.numPartMax; ++parts)
+	for(int parts = Params.numPartsMin; parts <= Params.numPartsMax; ++parts)
 		std::cout << parts << "," << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
 
 	return 0;
