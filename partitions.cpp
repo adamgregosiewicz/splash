@@ -174,15 +174,16 @@ struct Parameters {
     int partMax;
 
     Parameters(char* argv[]) {
-        int eMean = atoi(argv[1]);
-        double eStd = atof(argv[2]);
-        double eMin = atof(argv[3]);
-        double eMax = atof(argv[4]);
-        int partMin = atoi(argv[5]);
-        int partMax = atoi(argv[6]);
-
-        int eMinDiscrete = ceil(eMin);
-        int eMaxDiscrete = floor(eMax);
+        eMean = atoi(argv[1]);
+        eStd = atof(argv[2]);
+        eMin = atof(argv[3]);
+        eMax = atof(argv[4]);
+        partMin = atoi(argv[5]);
+        partMax = atoi(argv[6]);
+        eMinDiscrete = (int)ceil(eMin);
+        eMaxDiscrete = (int)floor(eMax);
+        numPartMin = (size_t)ceil(eMinDiscrete / (double)partMax);
+        numPartMax = (size_t)floor(eMaxDiscrete / (double)partMin);
     };
 };
 
@@ -194,7 +195,7 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    Parameters Params = Parameters(argv);
+    Parameters Params(argv);
 
     std::vector<bigFloat> probabilitiesNormalDiscrete;
     probabilitiesNormalDiscrete = calculateNormalDiscrete(Params.eMean, Params.eStd, Params.eMin, Params.eMax);
@@ -228,8 +229,10 @@ int main(int argc, char* argv[]) {
     std::cout << P.numberOfPartitions(80, 20, 60) << std::endl;
     std::cout << P.numberOfPartitions(80, 15, 60) << std::endl;
     std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
+    //return 0;
+
+    std::cout << Params.numPartMin << " " << Params.numPartMax << std::endl;
     return 0;
-    
 
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
