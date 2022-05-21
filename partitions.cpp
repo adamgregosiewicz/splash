@@ -16,15 +16,6 @@
 using namespace boost::math;
 using boost::multiprecision::cpp_dec_float_50;
 
-#define nnmax 10260
-#define mmmax 130
-#define kkmax 270
-
-#define mNmax 14566
-#define mNmin 5502
-#define kjmin 113
-#define kjmax 288
-
 typedef boost::multiprecision::uint512_t bigInt;
 typedef boost::multiprecision::cpp_dec_float_100 bigFloat;
 
@@ -103,43 +94,6 @@ class Partitions {
         }
 };
 
-int width;
-long long blockSize;
-static vector3d<bigInt> memoize;
-//static std::vector<std::vector<std::vector<bigInt>>> memoize;
-
-long long blockCalc(int n, int m, int myMax){
-    return myMax * blockSize + (n - m) * width + m - 2;
-}
-
-bigInt CountPartLenCap(int n, int m, int myMax) {
-    
-    //const int block = myMax * blockSize + (n - m) * width + m - 2;
-    
-    if (memoize(n,m,myMax) != 0) return memoize(n,m,myMax);    
-    
-    if (myMax * m < n || n < m) return 0;
-    if (myMax * m == n || n <= m + 1) return (memoize(n,m,myMax) = 1);
-    if (m < 2) return (memoize(n,m,myMax) = m);
-    
-    if (m == 2) {
-        if (myMax * 2 >= n) {
-            myMax = std::min(myMax, n - 1);
-            return (memoize(n,m,myMax) = n / m - (n - 1 - myMax));
-        } else {
-            return 0;
-        }
-    }
-
-    bigInt count = 0;
-    int niter = n / m;
-    for (; niter--; n -= m, --myMax) {
-        count += (memoize(n-1,m-1,myMax) = CountPartLenCap(n - 1, m - 1, myMax));
-    }
-    
-    return (memoize(n,m,myMax) = count);
-}
-
 std::vector<bigFloat> calculateNormalDiscrete(double mean, double std, double min, double max) {
 
     int minCeil = ceil(min);
@@ -200,30 +154,7 @@ int main(int argc, char* argv[]) {
     std::vector<bigFloat> probabilitiesNormalDiscrete;
     probabilitiesNormalDiscrete = calculateNormalDiscrete(Params.eMean, Params.eStd, Params.eMin, Params.eMax);
 
-    int n,nlow,m,low,up,myMax;
-    //std::cin >> n >> m >> low >> up;
-    
-    nlow = mNmin;
-    n = mNmax;
-    m = 10;
-    //myMax = 60;
-    
-    int kmax,kmin;
-    kmin = kjmin;
-    kmax = kjmax;
-    myMax = kmax;
-    
-    //int mmax = 150;
-
-    width = m;
-    blockSize = m * (n - m + 1);
-    //memoize = vector3d<bigInt>(nnmax,mmmax,kkmax, 0);
-    memoize = vector3d<bigInt>(100,20,50, 0);
-    
-    std::vector<bigInt> sums;
     std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
-
-    std::cout << CountPartLenCap(80, 20, 60) << std::endl;
 
     Partitions P = Partitions(80, 20, 60);
     std::cout << P.numberOfPartitions(80, 20, 60) << std::endl;
@@ -237,18 +168,6 @@ int main(int argc, char* argv[]) {
             sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partMin, Params.partMax);
 		}
 	}
-	
-	int nimin = (int)ceil(mNmin/(double)kjmax);
-	int nimax = mNmax/kjmin;
-
-	std::cout << "policzone podzialy" << std::endl;
-	int nnn = 6000;
-	int uuu = 244;
-	std::cout << CountPartLenCap(nnn-50*111, 50, 244-111) << std::endl;
-	std::cout << sums[6000] << std::endl;
-	
-	std::cout << std::setprecision(50) << (bigFloat)CountPartLenCap(nnn-50*111,50,244-111)/(bigFloat)sums[6000] << std::endl;
-	//return 0;
 
     std::vector<bigFloat> probabilitiesPartitions(Params.eMaxDiscrete + 1, 0);
 
@@ -265,24 +184,6 @@ int main(int argc, char* argv[]) {
 	
 	for(int parts = Params.numPartMin; parts <= Params.numPartMax; ++parts)
 		std::cout << parts << "," << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
-		//std::cout << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
-	//return 0;
-            
-    /*std::cout << CountPartLenCap(10, 7, 10) << std::endl;
-    std::cout << "czekam" << std::endl;
-    std::cout << CountPartLenCap(13, 2, 8) << std::endl;
-    std::cout << CountPartLenCap(20, 5, 10) << std::endl;
-    std::cout << CountPartLenCap(200, 10, 50) << std::endl;*/
-    std::cout << CountPartLenCap(1000, 101, 50) << std::endl;
-    std::cout << CountPartLenCap(1000, 100, 50) << std::endl;
-    return 0;
-    while(1){
-        std::cin >> n >> m >> low >> up;
-        n -= m*(low-1);
-        up -= (low-1);
-        std::cout << CountPartLenCap(n, m, up) << std::endl;
-    }
-    
-	//std::cout << CountPartLenCap(n, m, up) << std::endl;
+
 	return 0;
 }
