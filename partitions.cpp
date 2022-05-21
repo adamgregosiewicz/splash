@@ -6,9 +6,6 @@
 #include <boost/multiprecision/cpp_dec_float.hpp>
 #include <boost/math/distributions/normal.hpp>
 
-
-using boost::multiprecision::cpp_dec_float_50;
-
 typedef boost::multiprecision::uint512_t bigInt;
 typedef boost::multiprecision::cpp_dec_float_100 bigFloat;
 
