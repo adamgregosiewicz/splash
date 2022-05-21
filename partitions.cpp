@@ -34,34 +34,34 @@ class Partitions {
         vector3d<bigInt> partitionsMatrix;
 
     public:
-        Partitions(size_t maxNumber, size_t maxPartsNumber, size_t maxPartSize) {
-            partitionsMatrix = vector3d<bigInt>(maxNumber + 1, maxPartsNumber + 1, maxPartSize + 1, 0);
+        Partitions(size_t maxNumber, size_t partsCardMax, size_t partSizeMax) {
+            partitionsMatrix = vector3d<bigInt>(maxNumber + 1, partsCardMax + 1, partSizeMax + 1, 0);
         }
 
-        bigInt numberOfPartitions(size_t number, size_t parts, size_t partMax) {
+        bigInt numberOfPartitions(size_t number, size_t parts, size_t partSizeMax) {
         // Count the number of partitions of the number into parts parts with restrictions
-        // on each part to be at least 1 and at most partMax
+        // on each part to be at least 1 and at most partSizeMax
 
             // already counted
-            if (partitionsMatrix(number, parts, partMax) != 0)
-                return partitionsMatrix(number, parts, partMax);
+            if (partitionsMatrix(number, parts, partSizeMax) != 0)
+                return partitionsMatrix(number, parts, partSizeMax);
             
             // partition is impossible, the number is too large or too small
-            if (partMax * parts < number || number < parts) 
+            if (partSizeMax * parts < number || number < parts) 
                 return 0;
 
-            // only one possibility: all ones or all partMax
-            if (partMax * parts == number || number <= parts + 1)
-                return (partitionsMatrix(number, parts, partMax) = 1);
+            // only one possibility: all ones or all partSizeMax
+            if (partSizeMax * parts == number || number <= parts + 1)
+                return (partitionsMatrix(number, parts, partSizeMax) = 1);
             
             if (parts == 1)
-                return (partitionsMatrix(number, parts, partMax) = 1);
+                return (partitionsMatrix(number, parts, partSizeMax) = 1);
             
             if (parts == 2) {
-                if (partMax * 2 >= number) {
+                if (partSizeMax * 2 >= number) {
                     // partition is possible
-                    partMax = std::min(partMax, number - 1);
-                    return (partitionsMatrix(number, parts, partMax) = number / parts - (number - 1 - partMax));
+                    partSizeMax = std::min(partSizeMax, number - 1);
+                    return (partitionsMatrix(number, parts, partSizeMax) = number / parts - (number - 1 - partSizeMax));
                 } else {
                     return 0;
                 }
@@ -71,19 +71,21 @@ class Partitions {
             bigInt count = 0;
             size_t iterNum = number / parts;
             for (size_t i = 0; i < iterNum; ++i) {
-                count += (partitionsMatrix(number-1, parts-1, partMax) = numberOfPartitions(number - 1, parts - 1, partMax));
+                count += (partitionsMatrix(number-1, parts-1, partSizeMax) = numberOfPartitions(number - 1, parts - 1, partSizeMax));
                 number -= parts;
-                --partMax;
+                --partSizeMax;
             }
             
-            return (partitionsMatrix(number,parts,partMax) = count);
+            return (partitionsMatrix(number, parts, partSizeMax) = count);
         }
 
-        bigInt numberOfPartitions(size_t number, size_t parts, size_t partMin, size_t partMax) {
-            return numberOfPartitions(number - parts * (partMin - 1), parts, partMax - partMin + 1);
+        // Return number of partitions with parts bounded by partSizeMin and partSizeMax
+        bigInt numberOfPartitions(size_t number, size_t parts, size_t partSizeMin, size_t partSizeMax) {
+            return numberOfPartitions(number - parts * (partSizeMin - 1), parts, partSizeMax - partSizeMin + 1);
         }
 };
 
+// discrete normal distribution restricted to [ceil(min),floor(max)]
 std::vector<bigFloat> calculateNormalDiscrete(double mean, double std, double min, double max) {
 
     int minCeil = ceil(min);
@@ -152,6 +154,7 @@ int main(int argc, char* argv[]) {
     std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
     //return 0;
 
+    // calculate partitions
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
         for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts) {
@@ -161,6 +164,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<bigFloat> probabilitiesPartitions(Params.eMaxDiscrete + 1, 0);
 
+    // calculate distribution
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
 		if(energy % 1000 == 0) std::cout << energy << std::endl;
         for(int parts = (int)ceil(energy / (double)Params.partMax); parts <= energy / Params.partMin; ++parts) {
@@ -170,6 +174,7 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+    // print distribution
     std::cout << Params.numPartMin << " " << Params.numPartMax << std::endl;
 	
 	for(int parts = Params.numPartMin; parts <= Params.numPartMax; ++parts)
