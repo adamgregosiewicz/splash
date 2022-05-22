@@ -148,11 +148,7 @@ int main(int argc, char* argv[]) {
 
     std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
 
-    Partitions P(80, 20, 60);
-    std::cout << P.numberOfPartitions(80, 20, 60) << std::endl;
-    std::cout << P.numberOfPartitions(80, 15, 60) << std::endl;
-    std::cout << P.numberOfPartitions(10, 3, 3, 60) << std::endl;
-    return 0;
+    Partitions P(Params.eMaxDiscrete, Params.numPartsMax, Params.partSizeMax);
 
     // calculate partitions
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
