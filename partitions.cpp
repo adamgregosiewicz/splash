@@ -128,8 +128,8 @@ struct Parameters {
         partSizeMax = atoi(argv[6]);
         eMinDiscrete = (int)ceil(eMin);
         eMaxDiscrete = (int)floor(eMax);
-        numPartsMin = (size_t)ceil(eMinDiscrete / (double)partSizeMax);
-        numPartsMax = (size_t)floor(eMaxDiscrete / (double)partSizeMin);
+        numPartsMin = (size_t)ceil(eMin / (double)partSizeMax);
+        numPartsMax = (size_t)floor(eMax / (double)partSizeMin);
     };
 };
 
