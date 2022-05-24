@@ -95,9 +95,9 @@ def chisquare(empirical, cumulative_distribution_function_df, num_of_intervals):
     return stats.chisquare(cardinalities, cardinalities_expected)
 
 
-empirical_filename = sys.argv[1]
-model_filename = sys.argv[2]
-num_of_intervals = int(sys.argv[3])
+empirical_filename = sys.argv[1] # empirical data
+model_filename = sys.argv[2] # model data (distribution function)
+num_of_intervals = int(sys.argv[3]) # number of intervals for chisquare test
 
 sticky_paper_df = pd.read_csv(empirical_filename)
 model_df = pd.read_csv(model_filename)
