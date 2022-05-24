@@ -4,17 +4,24 @@ import sys
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-def cdf_df(model_df):
-    model_df.iloc[:,1] = np.cumsum(model_df.iloc[:,1])
-    return model_df
+def cdf_df(distribution_function_df):
+    """
+    In:
+        distribution_function_df: probability distribution function DataFrame(arguments, probabilities)
+    Out:
+        cumulative_distribution_function_df: DataFrame(arguments, cumulative probabilities)
+    """
+    distribution_function_df.iloc[:,1] = np.cumsum(distribution_function_df.iloc[:,1])
+    return distribution_function_df
+
 
 def quantiles_list(cdf_df, num_of_intervals):
     """
     In:
-        cdf_df - CDF DatFrame (args and values)
+        cdf_df - CDF DatFrame(arguments, probabilities)
     Out:
-        0. list of arguments i's such that cdf(i) < 1 / num_of_intevals <= cdf(i+1)
-        1. [cdf(i)]
+        quantiles: list of arguments i's such that cdf(i) < k / num_of_intevals <= cdf(i+1) for k = 1,...,num_of_intervals
+        probabilities: list of respective values of the cdf
     """
     step = 1 / num_of_intervals
     quantiles = []
@@ -26,18 +33,33 @@ def quantiles_list(cdf_df, num_of_intervals):
             quantiles += [arg]
             threshold += step
     
+    # Because of rounding it happens that the last value of cdf is 0.99999... and not 1.
     if len(quantiles) < num_of_intervals:
         quantiles += [len(cdf_df) - 1]
 
     return quantiles, probabilities
 
 def idx_of_interval(quantiles, single_empirical):
+    """
+    In:
+        quantiles: list of quantiles
+        single_empirical: single empirical data
+    Out:
+        Index of the first quantile that is as least single_empirical
+    """
     for idx, i in enumerate(quantiles):
         if single_empirical <= i:
             return idx
     return len(quantiles) - 1
 
 def intervals_cardinality(quantiles, empirical):
+    """
+    In:
+        quantiles: list of quantiles
+        empirical: list of empirical data
+    Out:
+        list of cardinalities of each interval determined by quantiles for empirical data
+    """
     intervals_card = [0] * len(quantiles)
     for e in empirical:
         intervals_card[idx_of_interval(quantiles, e)] += 1
@@ -46,6 +68,9 @@ def intervals_cardinality(quantiles, empirical):
 
 
 def uniform_distribution_df(min, max):
+    """
+    Return the distribution function (DataFrame(arguments, probabilities)) of the discrete uniform distribution on the interval [min,max].
+    """
     length = max - min + 1
     ud_cdf_df = pd.DataFrame()
     ud_cdf_df['no'] = range(min,max+1)
@@ -53,8 +78,18 @@ def uniform_distribution_df(min, max):
     return ud_cdf_df
 
 
-def chisquare(empirical, model_df, num_of_intervals):
-    quantiles, probabilities = quantiles_list(cdf_df(model_df), num_of_intervals)
+def chisquare(empirical, distribution_function_df, num_of_intervals):
+    """
+    Return chisquare statistics.
+
+    In:
+        empirical: list of empirical data
+        distribution_function_df: theoretical distribution function (DataFrame(arguments, probabilities))
+        num_of_intervals: number of intervals for chisquare test
+    Out:
+        chisquare statistics and p-value
+    """
+    quantiles, probabilities = quantiles_list(cdf_df(distribution_function_df), num_of_intervals)
     cardinalities = intervals_cardinality(quantiles, empirical)
     cardinalities_expected = np.multiply(probabilities,len(empirical))
     return stats.chisquare(cardinalities, cardinalities_expected)
