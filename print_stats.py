@@ -78,18 +78,18 @@ def uniform_distribution_df(min, max):
     return ud_cdf_df
 
 
-def chisquare(empirical, distribution_function_df, num_of_intervals):
+def chisquare(empirical, cumulative_distribution_function_df, num_of_intervals):
     """
     Return chisquare statistics.
 
     In:
         empirical: list of empirical data
-        distribution_function_df: theoretical distribution function (DataFrame(arguments, probabilities))
+        cumulative_distribution_function_df: theoretical cumulativedistribution function (DataFrame(arguments, probabilities))
         num_of_intervals: number of intervals for chisquare test
     Out:
         chisquare statistics and p-value
     """
-    quantiles, probabilities = quantiles_list(cdf_df(distribution_function_df), num_of_intervals)
+    quantiles, probabilities = quantiles_list(cumulative_distribution_function_df, num_of_intervals)
     cardinalities = intervals_cardinality(quantiles, empirical)
     cardinalities_expected = np.multiply(probabilities,len(empirical))
     return stats.chisquare(cardinalities, cardinalities_expected)
@@ -101,7 +101,7 @@ num_of_intervals = int(sys.argv[3])
 
 sticky_paper_df = pd.read_csv(empirical_filename)
 model_df = pd.read_csv(model_filename)
-
+model_cdf_df = cdf_df(model_df)
 
 # STICKY PAPER
 # count splashes from 0
@@ -112,8 +112,11 @@ sticky_paper_card = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in r
 sticky_paper_card_sorted = sorted(sticky_paper_card)
 
 print(f'{num_of_intervals} intervals')
+print(f'Expected cardinalities: {np.multiply(quantiles_list(model_df, num_of_intervals)[1],len(sticky_paper_card_sorted))}')
 print(f'IP: {chisquare(sticky_paper_card_sorted, model_df, num_of_intervals)}')
-print(f'U: {chisquare(sticky_paper_card_sorted, uniform_distribution_df(34,81), num_of_intervals)}')
+print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(model_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
+print(f'U: {chisquare(sticky_paper_card_sorted, cdf_df(uniform_distribution_df(34,81)), num_of_intervals)}')
+print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(cdf_df(uniform_distribution_df(34,81)), num_of_intervals)[0], sticky_paper_card_sorted)}')
 
 
 sys.exit()
