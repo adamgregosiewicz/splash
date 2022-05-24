@@ -115,11 +115,13 @@ print(f'{num_of_intervals} intervals')
 print(f'Expected cardinalities: {np.multiply(quantiles_list(model_df, num_of_intervals)[1],len(sticky_paper_card_sorted))}')
 print(f'IP: {chisquare(sticky_paper_card_sorted, model_df, num_of_intervals)}')
 print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(model_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
-print(f'U: {chisquare(sticky_paper_card_sorted, cdf_df(uniform_distribution_df(34,81)), num_of_intervals)}')
-print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(cdf_df(uniform_distribution_df(34,81)), num_of_intervals)[0], sticky_paper_card_sorted)}')
+
+uniform_df = cdf_df(uniform_distribution_df(34, 81))
+print(f'U: {chisquare(sticky_paper_card_sorted, uniform_df, num_of_intervals)}')
+print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(uniform_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
 
 
-sys.exit()
+
 
 # MODEL
 x = list(model_df['no'])
@@ -128,24 +130,7 @@ y = y.cumsum()
 y = y.to_list()
 # print(y)
 
-# print(generate_uniform(34,81))
-intervals, probabilities = quantiles_list(uniform_distribution_cdf_df(34,81),num_of_intervals)
-print(intervals)
-print(probabilities)
-cards = intervals_cardinality(34, intervals, sticky_paper_card_sorted)
-cards_expected = np.multiply(probabilities, 48)
-# print(cards)
-# print(cards_expected)
-print(stats.chisquare(cards, cards_expected))
 
-intervals, probabilities = quantiles_list(y, num_of_intervals)
-# print(intervals)
-# print(probabilities)
-cards = intervals_cardinality(x[0], intervals, sticky_paper_card_sorted)
-cards_expected = np.multiply(probabilities,48)
-# print(cards)
-# print(cards_expected)
-print(stats.chisquare(cards, cards_expected))
 
 
 
