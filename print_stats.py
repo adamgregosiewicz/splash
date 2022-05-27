@@ -191,9 +191,18 @@ def cdf_for_plot_from_cdf(args, values):
 
 
 def cdf_for_plot(values, args = None):
-    # if not assumeSorted:
-    #     seq = sorted(seq)
-
+    """
+    Returns coorinates of points for plotting CDF.
+    In:
+        values: if args = None, then this is a list of empirical data.
+                if args != None, then this is a list of values of CDF.
+        args: list of arguments of CDF
+    Out:
+        cdf_support: support of CDF
+        cdf_values: values of CDF
+    Example:
+        [3, 5], [0.2, 1.0] -> [3, 3, 5, 5], [0, 0.2, 0.2, 1]
+    """
     if args is None:
         cdf_support, cdf_values = cdf_for_plot_from_sequence(values)
     else:
