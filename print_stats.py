@@ -24,19 +24,19 @@ def quantiles_list(cdf_df, num_of_intervals):
         quantiles: list of arguments i's such that cdf(i) < k / num_of_intevals <= cdf(i+1) for k = 1,...,num_of_intervals
         probabilities: list of respective values of the cdf
     """
-    step = 1 / num_of_intervals
+    step = 1.0 / num_of_intervals
     quantiles = []
     probabilities = [step] * num_of_intervals
 
     threshold = step
     for arg, cdf in zip(cdf_df.iloc[:,0], cdf_df.iloc[:,1]):
-        if cdf > threshold:
+        if cdf >= threshold:
             quantiles += [arg]
             threshold += step
     
-    # Because of rounding it happens that the last value of cdf is 0.99999... and not 1.
+    # add the last quantile if needed (the last quantile is the maximum argument of the cdf)
     if len(quantiles) < num_of_intervals:
-        quantiles += [len(cdf_df) - 1]
+        quantiles += [cdf_df.iloc[-1, 0]]
 
     return quantiles, probabilities
 
@@ -217,6 +217,7 @@ x_sticky_paper = [x_min] + x_sticky_paper + [x_max]
 y_sticky_paper = [0.0] + y_sticky_paper + [1.0]
 
 # PLOT CDFs
+
 fig, ax = plt.subplots()
 
 ax.plot(x_sticky_paper, y_sticky_paper, color='black', label='Experiment')
