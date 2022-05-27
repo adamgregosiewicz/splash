@@ -96,32 +96,6 @@ def chisquare(empirical, cumulative_distribution_function_df, num_of_intervals):
     return stats.chisquare(cardinalities, cardinalities_expected)
 
 
-empirical_filename = sys.argv[1] # empirical data
-model_filename = sys.argv[2] # model data (distribution function)
-num_of_intervals = int(sys.argv[3]) # number of intervals for chisquare test
-
-sticky_paper_df = pd.read_csv(empirical_filename)
-model_df = pd.read_csv(model_filename)
-model_cdf_df = cdf_df(model_df)
-
-# STICKY PAPER
-# count splashes from 0
-sticky_paper_df['no'] -= 1
-
-sticky_paper_card = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
-
-sticky_paper_card_sorted = sorted(sticky_paper_card)
-
-print(f'{num_of_intervals} intervals')
-print(f'Expected cardinalities: {np.multiply(quantiles_list(model_df, num_of_intervals)[1],len(sticky_paper_card_sorted))}')
-print(f'IP: {chisquare(sticky_paper_card_sorted, model_df, num_of_intervals)}')
-print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(model_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
-
-uniform_df = cdf_df(uniform_distribution_df(34, 81))
-print(f'U: {chisquare(sticky_paper_card_sorted, uniform_df, num_of_intervals)}')
-print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(uniform_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
-
-
 def cdf_for_plot_from_sequence(values):
     """
     In:
@@ -194,8 +168,34 @@ def cdf_for_plot(values, args = None):
     return cdf_support, cdf_values
 
 
+# read data from files
+empirical_filename = sys.argv[1] # empirical data
+model_filename = sys.argv[2] # model data (distribution function)
+num_of_intervals = int(sys.argv[3]) # number of intervals for chisquare test
+
+sticky_paper_df = pd.read_csv(empirical_filename)
+model_df = pd.read_csv(model_filename)
+model_cdf_df = cdf_df(model_df)
+
+# sticky paper
+# count splashes from 0
+sticky_paper_df.iloc[:, 0] -= 1
+sticky_paper_card = [len(sticky_paper_df[sticky_paper_df.iloc[:, 0] == i]) for i in range(48)]
+sticky_paper_card_sorted = sorted(sticky_paper_card)
+
+print(f'{num_of_intervals} intervals')
+print(f'Expected cardinalities: {np.multiply(quantiles_list(model_df, num_of_intervals)[1],len(sticky_paper_card_sorted))}')
+print(f'IP: {chisquare(sticky_paper_card_sorted, model_df, num_of_intervals)}')
+print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(model_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
+
+uniform_df = cdf_df(uniform_distribution_df(34, 81))
+print(f'U: {chisquare(sticky_paper_card_sorted, uniform_df, num_of_intervals)}')
+print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(uniform_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
+
+# Print graphs
 
 # MODEL
+
 x_model = list(model_df.iloc[:, 0])
 y_model = list(model_df.iloc[:, 1])
 
@@ -206,9 +206,10 @@ shift = 5
 x_min = x_model[0] - shift
 x_max = x_model[-1] - shift
 x_model = [x_min] + x_model
-y_model = [0] + y_model
+y_model = [0.0] + y_model
 
 # STICKY PAPER
+
 x_sticky_paper, y_sticky_paper = cdf_for_plot(sticky_paper_card_sorted)
 
 # extend CDF to the left and to the right
