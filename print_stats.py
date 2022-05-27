@@ -126,22 +126,9 @@ print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(uniform_d
 # MODEL
 x = list(model_df['no'])
 y = model_df['prob']
-y = y.cumsum()
+# y = y.cumsum()
 y = y.to_list()
 # print(y)
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 #fig, ax = plt.subplots(figsize=(8, 4))
 fig, ax = plt.subplots()
@@ -151,48 +138,102 @@ bins = sticky_paper_card_sorted + [np.inf]
 #n, bins, patches = ax.hist(sticky_paper_card_sorted, histtype='step',
 #                           cumulative=True, label='Empirical', bins = bins)
 
-def ecdf4plot(seq, assumeSorted = False):
+
+def cdf_for_plot_from_sequence(values):
     """
     In:
-    seq - sorted-able object containing values
-    assumeSorted - specifies whether seq is sorted or not
+        values: sorted list containing values
     Out:
-    0. values of support at both points of jump discontinuities
-    1. values of ECDF at both points of jump discontinuities
-       ECDF's true value at a jump discontinuity is the higher one    """
-    if not assumeSorted:
-        seq = sorted(seq)
-    prev = seq[0]
-    n = len(seq)
-    support = [prev]
-    ECDF = [0.]
-    for i in range(1, n):
-        seqi = seq[i]
-        if seqi != prev:
-            preP = i/n
-            support.append(prev)
-            ECDF.append(preP)
-            support.append(seqi)
-            ECDF.append(preP)
-            prev = seqi
-    support.append(prev)
-    ECDF.append(1.)
-    return support, ECDF
+        cdf_support: values of support at both points of jump discontinuities
+        cdf_values: values of ECDF at both points of jump discontinuities
+        CDF's true value at a jump discontinuity is the higher one
+    """
+    prev = values[0]
+    n = len(values)
+    cdf_support = [prev]
+    cdf_values = [0.]
 
-x_sp, y_sp = ecdf4plot(sticky_paper_card_sorted)
+    for i in range(1, n):
+        value = values[i]
+        if value != prev:
+            probability = i / n
+            cdf_support += [prev, value]
+            cdf_values += [probability, probability]
+            prev = value
+
+    cdf_support.append(prev)
+    cdf_values.append(1.)
+
+    return cdf_support, cdf_values
+
+
+def cdf_for_plot_from_cdf(args, values):
+    """
+    In:
+        args: sorted list containing arguments
+        values: sorted list containing probabilities (values of CDF)
+    Out:
+        cdf_support: values of support at both points of jump discontinuities
+        cdf_values: values of ECDF at both points of jump discontinuities
+        CDF's true value at a jump discontinuity is the higher one
+    Example:
+        [3, 5], [0.2, 1.0] -> [3, 3, 5, 5], [0, 0.2, 0.2, 1]
+    """
+    cdf_support = []
+    cdf_values = [0.0]
+    for i in range(len(args)):
+        cdf_support += [args[i], args[i]]
+        cdf_values += [values[i], values[i]]
+
+    cdf_values.pop()
+
+    return cdf_support, cdf_values
+
+
+def cdf_for_plot(values, args = None):
+    # if not assumeSorted:
+    #     seq = sorted(seq)
+
+    if args is None:
+        cdf_support, cdf_values = cdf_for_plot_from_sequence(values)
+    else:
+        cdf_support, cdf_values = cdf_for_plot_from_cdf(args, values)
+    
+    return cdf_support, cdf_values
+
+
+
+x_sp, y_sp = cdf_for_plot(sticky_paper_card_sorted)
 plt.plot(x_sp, y_sp, label='Empirical')
 
 #ax.plot(sticky_paper_card_sorted, sticky_paper_card_sorted_prob, 'ro')
 
-ax.plot(x, y, 'r--', linewidth=1.5, label='Model')
-
+x, y = cdf_for_plot(y, x)
+plt.plot(x, y, color='red', label='Model')
 # tidy up the figure
-ax.grid(True)
-plt.xlim(15, 115)
+#ax.grid(True)
+#plt.xlim(15, 115)
 ax.legend(loc='right')
 ax.set_title('Cumulative step histograms')
 ax.set_xlabel('Annual rainfall (mm)')
 ax.set_ylabel('Likelihood of occurrence')
+
+data = np.array([min(x) - 1] + x + [max(x) + 1])
+yn = np.array([0] + y)
+
+
+# https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.hlines.html
+# ax.hlines(y=yn, xmin=data[:-1], xmax=data[1:],
+#           color='red', zorder=1)
+
+# # https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.vlines.html
+# ax.vlines(x=data[1:-1], ymin=yn[:-1], ymax=yn[1:], color='red',
+#           #linestyle='dashed',
+#           zorder=1)
+
+# ax.scatter(data[1:-1], y, color='red', s=18, zorder=2)
+# ax.scatter(data[1:-1], yn[:-1], color='white', s=18, zorder=2,
+#            edgecolor='red')
 
 plt.show()
 
