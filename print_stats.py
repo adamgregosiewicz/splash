@@ -218,23 +218,6 @@ ax.set_title('Cumulative step histograms')
 ax.set_xlabel('Annual rainfall (mm)')
 ax.set_ylabel('Likelihood of occurrence')
 
-data = np.array([min(x) - 1] + x + [max(x) + 1])
-yn = np.array([0] + y)
-
-
-# https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.hlines.html
-# ax.hlines(y=yn, xmin=data[:-1], xmax=data[1:],
-#           color='red', zorder=1)
-
-# # https://matplotlib.org/api/_as_gen/matplotlib.axes.Axes.vlines.html
-# ax.vlines(x=data[1:-1], ymin=yn[:-1], ymax=yn[1:], color='red',
-#           #linestyle='dashed',
-#           zorder=1)
-
-# ax.scatter(data[1:-1], y, color='red', s=18, zorder=2)
-# ax.scatter(data[1:-1], yn[:-1], color='white', s=18, zorder=2,
-#            edgecolor='red')
-
 plt.show()
 
 #stats.chisquare(x_sp, x)
