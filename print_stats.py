@@ -219,24 +219,3 @@ ax.set_xlabel('Annual rainfall (mm)')
 ax.set_ylabel('Likelihood of occurrence')
 
 plt.show()
-
-#stats.chisquare(x_sp, x)
-
-#print(x[0],x[-1])
-
-# sp_obs = [0] * (numMax - numMin + 1)
-# for i in sticky_paper_card_sorted:
-#     sp_obs[i-numMin] += 1
-# #print(sp_obs)
-
-# exp = [48 * p for p in model_prob]
-# print(len(exp))
-
-# chi2 = 0
-# for i in range(numMax - numMin + 1):
-#     chi2 += (sp_obs[i] - exp[i])**2 / exp[i]
-
-# print(chi2)
-
-# print(stats.chisquare(sp_obs, exp))
-
