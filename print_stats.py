@@ -1,8 +1,9 @@
 import numpy as np
 import pandas as pd
 import sys
-import matplotlib.pyplot as plt
 import scipy.stats as stats
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FormatStrFormatter
 
 def cdf_df(distribution_function_df):
     """
@@ -121,24 +122,6 @@ print(f'U: {chisquare(sticky_paper_card_sorted, uniform_df, num_of_intervals)}')
 print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(uniform_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
 
 
-
-
-# MODEL
-x = list(model_df['no'])
-y = model_df['prob']
-# y = y.cumsum()
-y = y.to_list()
-# print(y)
-
-#fig, ax = plt.subplots(figsize=(8, 4))
-fig, ax = plt.subplots()
-
-# plot the cumulative histogram
-bins = sticky_paper_card_sorted + [np.inf]
-#n, bins, patches = ax.hist(sticky_paper_card_sorted, histtype='step',
-#                           cumulative=True, label='Empirical', bins = bins)
-
-
 def cdf_for_plot_from_sequence(values):
     """
     In:
@@ -212,19 +195,39 @@ def cdf_for_plot(values, args = None):
 
 
 
-x_sp, y_sp = cdf_for_plot(sticky_paper_card_sorted)
-plt.plot(x_sp, y_sp, label='Empirical')
+# MODEL
+x_model = list(model_df.iloc[:, 0])
+y_model = list(model_df.iloc[:, 1])
 
-#ax.plot(sticky_paper_card_sorted, sticky_paper_card_sorted_prob, 'ro')
+x_model, y_model = cdf_for_plot(y_model, x_model)
 
-x, y = cdf_for_plot(y, x)
-plt.plot(x, y, color='red', label='Model')
-# tidy up the figure
-#ax.grid(True)
-#plt.xlim(15, 115)
+# extend CDF to the left
+shift = 5
+x_min = x_model[0] - shift
+x_max = x_model[-1] - shift
+x_model = [x_min] + x_model
+y_model = [0] + y_model
+
+# STICKY PAPER
+x_sticky_paper, y_sticky_paper = cdf_for_plot(sticky_paper_card_sorted)
+
+# extend CDF to the left and to the right
+x_sticky_paper = [x_min] + x_sticky_paper + [x_max]
+y_sticky_paper = [0.0] + y_sticky_paper + [1.0]
+
+# PLOT CDFs
+fig, ax = plt.subplots()
+
+ax.plot(x_sticky_paper, y_sticky_paper, color='black', label='Experiment')
+ax.plot(x_model, y_model, color='red', label='Model')
+
+ax.set_yticks([0.0, 1.0], minor=False)
+ax.set_yticks([0.2, 0.4, 0.6, 0.8], minor=True)
+ax.yaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
+ax.yaxis.grid(True, which='major')
 ax.legend(loc='right')
-ax.set_title('Cumulative step histograms')
-ax.set_xlabel('Annual rainfall (mm)')
-ax.set_ylabel('Likelihood of occurrence')
+ax.set_xlabel('Number of beads')
+ax.set_ylabel('Cummulative distribution function')
 
+plt.xlim(x_min, x_max)
 plt.show()
