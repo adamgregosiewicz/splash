@@ -5,14 +5,15 @@ import scipy.stats as stats
 import matplotlib.pyplot as plt
 from matplotlib.ticker import FormatStrFormatter
 
-def cdf_df(distribution_function_df):
+
+def cdf_from_df_df(distribution_function_df):
     """
     In:
         distribution_function_df: probability distribution function DataFrame(arguments, probabilities)
     Out:
         cumulative_distribution_function_df: DataFrame(arguments, cumulative probabilities)
     """
-    distribution_function_df.iloc[:,1] = np.cumsum(distribution_function_df.iloc[:,1])
+    distribution_function_df.iloc[:, 1] = np.cumsum(distribution_function_df.iloc[:, 1])
     return distribution_function_df
 
 
@@ -21,7 +22,8 @@ def quantiles_list(cdf_df, num_of_intervals):
     In:
         cdf_df - CDF DatFrame(arguments, probabilities)
     Out:
-        quantiles: list of arguments i's such that cdf(i) < k / num_of_intevals <= cdf(i+1) for k = 1,...,num_of_intervals
+        quantiles: list of arguments i's such that
+                   cdf(i) < k / num_of_intervals <= cdf(i+1) for k = 1,...,num_of_intervals
         probabilities: list of respective values of the cdf
     """
     step = 1.0 / num_of_intervals
@@ -29,7 +31,7 @@ def quantiles_list(cdf_df, num_of_intervals):
     probabilities = [step] * num_of_intervals
 
     threshold = step
-    for arg, cdf in zip(cdf_df.iloc[:,0], cdf_df.iloc[:,1]):
+    for arg, cdf in zip(cdf_df.iloc[:, 0], cdf_df.iloc[:, 1]):
         if cdf >= threshold:
             quantiles += [arg]
             threshold += step
@@ -39,6 +41,7 @@ def quantiles_list(cdf_df, num_of_intervals):
         quantiles += [cdf_df.iloc[-1, 0]]
 
     return quantiles, probabilities
+
 
 def idx_of_interval(quantiles, single_empirical):
     """
@@ -52,6 +55,7 @@ def idx_of_interval(quantiles, single_empirical):
         if single_empirical <= i:
             return idx
     return len(quantiles) - 1
+
 
 def intervals_cardinality(quantiles, empirical):
     """
@@ -68,31 +72,32 @@ def intervals_cardinality(quantiles, empirical):
     return intervals_card
 
 
-def uniform_distribution_df(min, max):
+def uniform_distribution_df(min_value, max_value):
     """
-    Return the distribution function (DataFrame(arguments, probabilities)) of the discrete uniform distribution on the interval [min,max].
+    Return the distribution function (DataFrame(arguments, probabilities)) of the discrete uniform distribution
+     on the interval [min_value, max_value].
     """
-    length = max - min + 1
+    length = max_value - min_value + 1
     ud_cdf_df = pd.DataFrame()
-    ud_cdf_df['no'] = range(min,max+1)
+    ud_cdf_df['no'] = range(min_value, max_value + 1)
     ud_cdf_df['prob'] = [1 / length] * length
     return ud_cdf_df
 
 
-def chisquare(empirical, cumulative_distribution_function_df, num_of_intervals):
+def chi_square(empirical, cumulative_distribution_function_df, num_of_intervals):
     """
-    Return chisquare statistics.
+    Return chi-square statistics.
 
     In:
         empirical: list of empirical data
-        cumulative_distribution_function_df: theoretical cumulativedistribution function (DataFrame(arguments, probabilities))
-        num_of_intervals: number of intervals for chisquare test
+        cumulative_distribution_function_df: theoretical CDF (DataFrame(arguments, probabilities))
+        num_of_intervals: number of intervals for chi-square test
     Out:
-        chisquare statistics and p-value
+        chi-square statistics and p-value
     """
     quantiles, probabilities = quantiles_list(cumulative_distribution_function_df, num_of_intervals)
     cardinalities = intervals_cardinality(quantiles, empirical)
-    cardinalities_expected = np.multiply(probabilities,len(empirical))
+    cardinalities_expected = np.multiply(probabilities, len(empirical))
     return stats.chisquare(cardinalities, cardinalities_expected)
 
 
@@ -147,9 +152,9 @@ def cdf_for_plot_from_cdf(args, values):
     return cdf_support, cdf_values
 
 
-def cdf_for_plot(values, args = None):
+def cdf_for_plot(values, args=None):
     """
-    Returns coorinates of points for plotting CDF.
+    Returns coordinates of points for plotting CDF.
     In:
         values: if args = None, then this is a list of empirical data.
                 if args != None, then this is a list of values of CDF.
@@ -169,13 +174,13 @@ def cdf_for_plot(values, args = None):
 
 
 # read data from files
-empirical_filename = sys.argv[1] # empirical data
-model_filename = sys.argv[2] # model data (distribution function)
-num_of_intervals = int(sys.argv[3]) # number of intervals for chisquare test
+empirical_filename = sys.argv[1]  # empirical data
+model_filename = sys.argv[2]  # model data (distribution function)
+number_of_intervals = int(sys.argv[3])  # number of intervals for chi-square test
 
 sticky_paper_df = pd.read_csv(empirical_filename)
 model_df = pd.read_csv(model_filename)
-model_cdf_df = cdf_df(model_df)
+model_cdf_df = cdf_from_df_df(model_df)
 
 # sticky paper
 # count splashes from 0
@@ -183,14 +188,17 @@ sticky_paper_df.iloc[:, 0] -= 1
 sticky_paper_card = [len(sticky_paper_df[sticky_paper_df.iloc[:, 0] == i]) for i in range(48)]
 sticky_paper_card_sorted = sorted(sticky_paper_card)
 
-print(f'{num_of_intervals} intervals')
-print(f'Expected cardinalities: {np.multiply(quantiles_list(model_df, num_of_intervals)[1],len(sticky_paper_card_sorted))}')
-print(f'IP: {chisquare(sticky_paper_card_sorted, model_df, num_of_intervals)}')
-print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(model_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
+print(f'{number_of_intervals} intervals')
+print(f'Expected cardinalities: '
+      f'{np.multiply(quantiles_list(model_df, number_of_intervals)[1], len(sticky_paper_card_sorted))}')
+print(f'IP: {chi_square(sticky_paper_card_sorted, model_df, number_of_intervals)}')
+print(f'Intervals cardinalities: '
+      f'{intervals_cardinality(quantiles_list(model_df, number_of_intervals)[0], sticky_paper_card_sorted)}')
 
-uniform_df = cdf_df(uniform_distribution_df(34, 81))
-print(f'U: {chisquare(sticky_paper_card_sorted, uniform_df, num_of_intervals)}')
-print(f'Intervals cardinalities: {intervals_cardinality(quantiles_list(uniform_df, num_of_intervals)[0], sticky_paper_card_sorted)}')
+uniform_df = cdf_from_df_df(uniform_distribution_df(34, 81))
+print(f'U: {chi_square(sticky_paper_card_sorted, uniform_df, number_of_intervals)}')
+print(f'Intervals cardinalities: '
+      f'{intervals_cardinality(quantiles_list(uniform_df, number_of_intervals)[0], sticky_paper_card_sorted)}')
 
 # Print graphs
 
@@ -229,7 +237,7 @@ ax.yaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
 ax.yaxis.grid(True, which='major')
 ax.legend(loc='right')
 ax.set_xlabel('Number of beads')
-ax.set_ylabel('Cummulative distribution function')
+ax.set_ylabel('Cumulative distribution function')
 
 plt.xlim(x_min, x_max)
 plt.show()
