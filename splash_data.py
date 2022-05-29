@@ -6,9 +6,9 @@ import math
 import matplotlib.pyplot as plt
 import scipy.stats as stats
 
-def find_outliers_IQR(df):
+def outliers_of_df(df):
     """
-    Returns outliers in DataFrame based on interquartile range (IQR)
+    Return outliers in DataFrame based on interquartile range (IQR).
     https://careerfoundry.com/en/blog/data-analytics/how-to-find-outliers/
     """
     q1 = df.quantile(0.20)
@@ -34,7 +34,7 @@ no_of_hsc = [1,2,3,4,5,7,8,9,10,11,12,13,14,16,17,18]
 
 
 # outliers handling
-high_speed_cam_df = high_speed_cam_df.drop(find_outliers_IQR(high_speed_cam_df['v']).index.tolist())
+high_speed_cam_df = high_speed_cam_df.drop(outliers_of_df(high_speed_cam_df['v']).index.tolist())
 
 
 
@@ -53,17 +53,23 @@ print(f"Energy min = {energy_min}, max = {energy_max}\n")
 
 print(f"Particle energy min = {energy_p_min}, max = {energy_p_max}\n")
 
-# cardinality of each splash
-high_speed_cam_len = [len(high_speed_cam_df[high_speed_cam_df['no'] == i]) for i in range(16)]
-sticky_paper_len = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
+def mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, sample_count):
+    """
+    Return mean and std of the random quotient of cardinalities of SP and HSC splashes.
 
-high_speed_cam_len_sum = sum(high_speed_cam_len)
-sp_hsc_card = pd.DataFrame([sum(random.sample(sticky_paper_len, 16))/sum(high_speed_cam_len) for i in range(1000)], columns = ['z'])
+    Since there are only 16 splashes recorded by HSC we take a random sample of 16 splashes
+    recorder by SP and divide the sum of beads in these 16 splashes by the sum of beads in
+    all HSC splashes.
+    """
+    
+    high_speed_camera_sum = sum([len(high_speed_camera_df[high_speed_camera_df['no'] == i]) for i in range(16)])
+    sticky_paper_cardinalities = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
+    sp_hsc_quotient = [sum(random.sample(sticky_paper_cardinalities, 16)) / high_speed_camera_sum for i in range(sample_count)]
 
-scaling_mean = sp_hsc_card.mean()[0]
-scaling_std = sp_hsc_card.std()[0]
+    return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
 
-scaling_mean = 2.95
+
+scaling_mean, scaling_std = mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_cam_df, 1000)
 
 energy_scaled_mean = energy_mean * scaling_mean
 energy_scaled_std = energy_std * scaling_mean
