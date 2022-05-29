@@ -7,11 +7,15 @@ import matplotlib.pyplot as plt
 import scipy.stats as stats
 
 def find_outliers_IQR(df):
-    q1=df.quantile(0.20)
-    q3=df.quantile(0.80)
-    IQR=q3-q1
+    """
+    Returns outliers in DataFrame based on interquartile range (IQR)
+    https://careerfoundry.com/en/blog/data-analytics/how-to-find-outliers/
+    """
+    q1 = df.quantile(0.20)
+    q3 = df.quantile(0.80)
+    iqr = q3 - q1
     
-    outliers = df[((df<(q1-1.5*IQR)) | (df>(q3+1.5*IQR)))]
+    outliers = df[((df < (q1 - 1.5 * iqr)) | (df > (q3 + 1.5 * iqr)))]
 
     return outliers
 
