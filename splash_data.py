@@ -19,6 +19,23 @@ def outliers_of_df(df):
 
     return outliers
 
+
+def mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, sample_count):
+    """
+    Return mean and std of the random quotient of cardinalities of SP and HSC splashes.
+
+    Since there are only 16 splashes recorded by HSC we take a random sample of 16 splashes
+    recorder by SP and divide the sum of beads in these 16 splashes by the sum of beads in
+    all HSC splashes.
+    """
+    
+    high_speed_camera_sum = sum([len(high_speed_camera_df[high_speed_camera_df['no'] == i]) for i in range(16)])
+    sticky_paper_cardinalities = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
+    sp_hsc_quotient = [sum(random.sample(sticky_paper_cardinalities, 16)) / high_speed_camera_sum for i in range(sample_count)]
+
+    return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
+
+
 high_speed_cam_df = pd.read_csv("high_speed_camera_1529.csv")
 sticky_paper_df = pd.read_csv("sp_1529.csv")
 
@@ -52,21 +69,6 @@ print(f"Energy mean = {energy_mean}, std = {energy_std}")
 print(f"Energy min = {energy_min}, max = {energy_max}\n")
 
 print(f"Particle energy min = {energy_p_min}, max = {energy_p_max}\n")
-
-def mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, sample_count):
-    """
-    Return mean and std of the random quotient of cardinalities of SP and HSC splashes.
-
-    Since there are only 16 splashes recorded by HSC we take a random sample of 16 splashes
-    recorder by SP and divide the sum of beads in these 16 splashes by the sum of beads in
-    all HSC splashes.
-    """
-    
-    high_speed_camera_sum = sum([len(high_speed_camera_df[high_speed_camera_df['no'] == i]) for i in range(16)])
-    sticky_paper_cardinalities = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
-    sp_hsc_quotient = [sum(random.sample(sticky_paper_cardinalities, 16)) / high_speed_camera_sum for i in range(sample_count)]
-
-    return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
 
 
 scaling_mean, scaling_std = mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_cam_df, 1000)
