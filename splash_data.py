@@ -28,28 +28,13 @@ sticky_paper_df['no'] -= 1
 # indicies of sticky paper registered by hsc
 no_of_hsc = [1,2,3,4,5,7,8,9,10,11,12,13,14,16,17,18]
 
-#sticky_paper_len = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
-#sticky_paper_len = [sticky_paper_len[i] for i in no_of_hsc]
-#print(sticky_paper_len)
-
-#high_speed_cam_len = [len(high_speed_cam_df[high_speed_cam_df['no'] == i]) for i in range(16)]
-
-#print(sum(sticky_paper_len)/sum(high_speed_cam_len))
-
-#sys.exit()
-
 
 # outliers handling
-
-# print(find_outliers_IQR(high_speed_cam_df['v']).index.tolist())
-# print(high_speed_cam_df['v'].max())
 high_speed_cam_df = high_speed_cam_df.drop(find_outliers_IQR(high_speed_cam_df['v']).index.tolist())
-# print(high_speed_cam_df['v'].max())
 
 
 
 energy_sum_df = pd.DataFrame([high_speed_cam_df[high_speed_cam_df['no'] == i]['e'].sum() for i in range(16)], columns = ['energy_sum'])
-# print(energy_sum_df)
 
 energy_mean = energy_sum_df.mean()[0]
 energy_std = energy_sum_df.std()[0]
@@ -98,9 +83,6 @@ print(f"Quant energy min = {energy_q_min}, max = {energy_q_max}\n")
 
 kmin = math.floor(energy_p_min / q)
 kmax = math.ceil(energy_p_max / q)
-
-#numMin = math.ceil(energy_scaled_min / energy_p_max)
-#numMax = math.floor(energy_scaled_max  / energy_p_min)
 
 numMin = math.ceil(energy_q_min / kmax)
 numMax = math.floor(energy_q_max  / kmin)
