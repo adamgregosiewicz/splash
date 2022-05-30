@@ -39,6 +39,13 @@ def mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, sample
     return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
 
 
+def energy_of_splashes(splashes_df):
+    """
+    Return cumulative energy of all splashes.
+    """
+    return [splashes_df[splashes_df['no'] == i]['e'].sum() for i in range(16)]
+
+
 high_speed_camera_df = pd.read_csv("high_speed_camera_1529.csv")
 sticky_paper_df = pd.read_csv("sp_1529.csv")
 
@@ -56,14 +63,12 @@ no_of_hsc = [1,2,3,4,5,7,8,9,10,11,12,13,14,16,17,18]
 # outliers handling
 high_speed_camera_df = drop_outliers(high_speed_camera_df, 'v')
 
+energy_sum = energy_of_splashes(high_speed_camera_df)
 
-
-energy_sum_df = pd.DataFrame([high_speed_camera_df[high_speed_camera_df['no'] == i]['e'].sum() for i in range(16)], columns = ['energy_sum'])
-
-energy_mean = energy_sum_df.mean()[0]
-energy_std = energy_sum_df.std()[0]
-energy_min = energy_sum_df.min()[0]
-energy_max = energy_sum_df.max()[0]
+energy_mean = np.mean(energy_sum)
+energy_std = np.std(energy_sum)
+energy_min = np.min(energy_sum)
+energy_max = np.max(energy_sum)
 
 energy_p_min = high_speed_camera_df['e'].min()
 energy_p_max = high_speed_camera_df['e'].max()
