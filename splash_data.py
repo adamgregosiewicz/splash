@@ -20,6 +20,9 @@ def outliers_of_df(df):
 
 
 def drop_outliers(df, column):
+    """
+    Return df with dropped outliers with respect to given column.
+    """
     return df.drop(outliers_of_df(df[column]).index.tolist())
 
 
