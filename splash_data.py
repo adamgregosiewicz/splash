@@ -4,6 +4,7 @@ import random
 import sys
 import math
 
+
 def outliers_of_df(df):
     """
     Return outliers in DataFrame based on interquartile range (IQR).
@@ -16,6 +17,7 @@ def outliers_of_df(df):
     outliers = df[((df < (q1 - 1.5 * iqr)) | (df > (q3 + 1.5 * iqr)))]
 
     return outliers
+
 
 def drop_outliers(df, column):
     return df.drop(outliers_of_df(df[column]).index.tolist())
@@ -44,8 +46,9 @@ def energy_of_splashes(splashes_df):
     return [splashes_df[splashes_df['no'] == i]['e'].sum() for i in range(16)]
 
 
-high_speed_camera_df = pd.read_csv("high_speed_camera_1529.csv")
-sticky_paper_df = pd.read_csv("sp_1529.csv")
+high_speed_camera_df = pd.read_csv(sys.argv[1])
+sticky_paper_df = pd.read_csv(sys.argv[2])
+Q = int(sys.argv[3])
 
 # count splashes from 0
 high_speed_camera_df['no'] -= 1
@@ -85,7 +88,7 @@ print(f"Scaling mean = {scaling_mean}, std = {scaling_std}, coeff of var = {scal
 print(f"Scaled energy mean = {energy_scaled_mean}, std = {energy_scaled_std}")
 print(f"Scaled energy min = {energy_scaled_min}, std = {energy_scaled_max}\n")
 
-Q = int(sys.argv[1])
+
 q = energy_scaled_mean / Q
 
 energy_q_mean = energy_scaled_mean / q
