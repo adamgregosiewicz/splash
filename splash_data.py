@@ -49,13 +49,20 @@ def energy_of_splashes(splashes_df):
     return [splashes_df[splashes_df['no'] == i]['e'].sum() for i in range(16)]
 
 
+def shift_splashes_no(splashes_df):
+    """
+    Count splashes from 0 and not from 1.
+    """
+    splashes_df['no'] -= 1
+
+
 high_speed_camera_df = pd.read_csv(sys.argv[1])
 sticky_paper_df = pd.read_csv(sys.argv[2])
 Q = int(sys.argv[3])
 
-# count splashes from 0
-high_speed_camera_df['no'] -= 1
-sticky_paper_df['no'] -= 1
+
+shift_splashes_no(high_speed_camera_df)
+shift_splashes_no(sticky_paper_df)
 
 # indicies of sticky paper registered by hsc
 no_of_hsc = [1,2,3,4,5,7,8,9,10,11,12,13,14,16,17,18]
