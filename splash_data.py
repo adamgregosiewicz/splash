@@ -3,8 +3,6 @@ import pandas as pd
 import random
 import sys
 import math
-import matplotlib.pyplot as plt
-import scipy.stats as stats
 
 def outliers_of_df(df):
     """
@@ -48,9 +46,6 @@ def energy_of_splashes(splashes_df):
 
 high_speed_camera_df = pd.read_csv("high_speed_camera_1529.csv")
 sticky_paper_df = pd.read_csv("sp_1529.csv")
-
-#high_speed_cam_df = pd.read_csv("hsc_15.csv")
-#sticky_paper_df = pd.read_csv("sp_15.csv")
 
 # count splashes from 0
 high_speed_camera_df['no'] -= 1
