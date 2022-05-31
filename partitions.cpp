@@ -42,7 +42,14 @@ class Partitions {
         size_t partSizeMax;
         std::vector<bigInt> cumulativePartitions;
 
-        Partitions(size_t maxNumber, size_t numPartsMax, size_t partSizeMax) {
+        Partitions(size_t minNumber, size_t maxNumber, size_t numPartsMin, size_t numPartsMax, size_t partSizeMin, size_t partSizeMax):
+            minNumber(minNumber),
+            maxNumber(maxNumber),
+            numPartMin(numPartMin),
+            numPartMax(numPartMax),
+            partSizeMin(partSizeMin),
+            partSizeMax(partSizeMax)
+        {
             partitionsMatrix = vector3d<bigInt>(maxNumber + 1, numPartsMax + 1, partSizeMax + 1, 0);
             cumulativePartitions = std::vector<bigInt>(maxNumber + 1, 0);
         }
@@ -91,6 +98,16 @@ class Partitions {
         // Return number of partitions with parts bounded by partSizeMin and partSizeMax
         bigInt numberOfPartitions(size_t number, size_t parts, size_t partSizeMin, size_t partSizeMax) {
             return numberOfPartitions(number - parts * (partSizeMin - 1), parts, partSizeMax - partSizeMin + 1);
+        }
+
+        // calculate partitions and cumulative partitions
+        void calculateCumulativePartitions() {
+            for(size_t number = minNumber; number <= maxNumber; ++number) {
+                // if(number % 100 == 0) std::cout << number << std::endl;
+                for(size_t parts = (int)ceil(number / (double)partSizeMax); parts <= number / partSizeMin; ++parts) {
+                    cumulativePartitions[number] += numberOfPartitions(number, parts, partSizeMin, partSizeMax);
+		        }
+	        }
         }
 };
 
@@ -177,17 +194,14 @@ int main(int argc, char* argv[]) {
 
     DiscreteNormalDistribution discreteNormalDistribution(parameters);
 
-    std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(parameters.eMaxDiscrete + 1, 0);
+    Partitions P(parameters.eMinDiscrete,
+                 parameters.eMaxDiscrete,
+                 parameters.numPartsMin,
+                 parameters.numPartsMax,
+                 parameters.partSizeMin,
+                 parameters.partSizeMax);
 
-    Partitions P(parameters.eMaxDiscrete, parameters.numPartsMax, parameters.partSizeMax);
-
-    // calculate partitions
-    for(int energy = parameters.eMinDiscrete; energy <= parameters.eMaxDiscrete; ++energy) {
-		// if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)parameters.partSizeMax); parts <= energy / parameters.partSizeMin; ++parts) {
-            sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, parameters.partSizeMin, parameters.partSizeMax);
-		}
-	}
+    P.calculateCumulativePartitions();
 
     std::vector<bigFloat> probabilitiesPartitions(parameters.eMaxDiscrete + 1, 0);
 
@@ -196,7 +210,7 @@ int main(int argc, char* argv[]) {
 		// if(energy % 1000 == 0) std::cout << energy << std::endl;
         for(int parts = (int)ceil(energy / (double)parameters.partSizeMax); parts <= energy / parameters.partSizeMin; ++parts) {
 			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, parameters.partSizeMin, parameters.partSizeMax)
-                                              / (bigFloat)sumsOfPartitions[energy]
+                                              / (bigFloat)P.cumulativePartitions[energy]
                                               * discreteNormalDistribution.distribution[energy];
 		}
 	}
