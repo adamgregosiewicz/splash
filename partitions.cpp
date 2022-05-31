@@ -181,6 +181,8 @@ class IntegerPartitionDistribution: public DiscreteDistribution {
             max = partitions.numPartsMax;
             distribution = std::vector<bigFloat>(partitions.maxNumber + 1, 0);
 
+            partitions.calculateCumulativePartitions();
+
             for(size_t number = partitions.minNumber; number <= partitions.maxNumber; ++number) {
                 for(size_t parts = (size_t)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
                     distribution[parts] += (bigFloat)partitions.numberOfPartitions(number, parts, partitions.partSizeMin, partitions.partSizeMax)
@@ -204,7 +206,6 @@ int main(int argc, char* argv[]) {
     Partitions partitions(parameters.eMinDiscrete, parameters.eMaxDiscrete,
                           parameters.numPartsMin, parameters.numPartsMax,
                           parameters.partSizeMin, parameters.partSizeMax);
-    partitions.calculateCumulativePartitions();
     IntegerPartitionDistribution integerPartitionDistribution(partitions, discreteNormalDistribution);
     integerPartitionDistribution.printDistribution();
 
