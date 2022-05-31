@@ -75,7 +75,7 @@ class EnergyStats:
         self.scaled_std = self.std * self.scaling_mean
         self.scaled_min = self.min * self.scaling_mean
         self.scaled_max = self.max * self.scaling_mean
-        self.quant_of_energy = self.scaled_mean / number_of_quants_of_energy
+        self.quant_of_energy = self.scaled_mean / splashes.number_of_quants_of_energy
         self.quantized_mean = self.scaled_mean / self.quant_of_energy
         self.quantized_std = self.scaled_std / self.quant_of_energy
         self.quantized_min = self.scaled_min / self.quant_of_energy
