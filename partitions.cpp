@@ -169,13 +169,13 @@ class DiscreteNormalDistribution: public DiscreteDistribution {
 
 class IntegerPartitionDistribution: public DiscreteDistribution {
     public:
+        // calculate integer partition distribution conditional on a given discrete distribution
         IntegerPartitionDistribution(Partitions partitions, DiscreteDistribution discreteDistribution) {
             min = partitions.minNumber;
             max = partitions.maxNumber;
             distribution = std::vector<bigFloat>(max + 1, 0);
 
             for(size_t number = partitions.minNumber; number <= partitions.maxNumber; ++number) {
-                // if(energy % 1000 == 0) std::cout << energy << std::endl;
                 for(size_t parts = (int)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
                     distribution[parts] += (bigFloat)partitions.numberOfPartitions(number, parts, partitions.partSizeMin, partitions.partSizeMax)
                                               / (bigFloat)partitions.cumulativePartitions[number]
@@ -206,13 +206,7 @@ int main(int argc, char* argv[]) {
 
     P.calculateCumulativePartitions();
 
-    std::vector<bigFloat> probabilitiesPartitions(parameters.eMaxDiscrete + 1, 0);
-
-    // calculate distribution
     IntegerPartitionDistribution integerPartitionDistribution(P, discreteNormalDistribution);
-
-    // print distribution
-    // std::cout << parameters.numPartsMin << " " << parameters.numPartsMax << std::endl;
 	
     std::cout << "no,prob" << std::endl;
 	for(int parts = parameters.numPartsMin; parts <= parameters.numPartsMax; ++parts)
