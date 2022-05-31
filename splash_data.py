@@ -42,13 +42,6 @@ def mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, sample
     return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
 
 
-def energy_of_splashes(splashes_df):
-    """
-    Return cumulative energy of all splashes.
-    """
-    return [splashes_df[splashes_df['no'] == i]['e'].sum() for i in range(16)]
-
-
 def shift_splashes_no(splashes_df):
     """
     Index splashes from 0 and not from 1.
@@ -63,6 +56,42 @@ def read_arguments():
     return pd.read_csv(sys.argv[1]), pd.read_csv(sys.argv[2]), int(sys.argv[3])
 
 
+class EnergyStats():
+    def __init__(self, splashes_hsc_df, splashes_sp_df, number_of_quants_of_energy):
+        self.sum = [splashes_hsc_df[splashes_hsc_df['no'] == i]['e'].sum() for i in range(16)]
+        self.mean = np.mean(self.sum)
+        self.std = np.std(self.sum)
+        self.min = np.min(self.sum)
+        self.max = np.max(self.sum)
+        self.min_particle = np.min(high_speed_camera_df['e'])
+        self.max_particle = np.max(high_speed_camera_df['e'])
+        self.scaling_mean, self.scaling_std = mean_std_sp_to_hsc_cardinality(splashes_sp_df, splashes_hsc_df, 1000)
+        self.scaled_mean = self.mean * self.scaling_mean
+        self.scaled_std = self.std * self.scaling_mean
+        self.scaled_min = self.min * self.scaling_mean
+        self.scaled_max = self.max * self.scaling_mean
+        self.quant_of_energy = self.scaled_mean / number_of_quants_of_energy
+        self.quantized_mean = self.scaled_mean / self.quant_of_energy
+        self.quantized_std = self.scaled_std / self.quant_of_energy
+        self.quantized_min = self.scaled_min / self.quant_of_energy
+        self.quantized_max = self.scaled_max / self.quant_of_energy
+        self.min_of_one_part = math.floor(self.min_particle / self.quant_of_energy)
+        self.max_of_one_part = math.ceil(self.max_particle / self.quant_of_energy)
+        self.min_number_of_parts = math.ceil(self.quantized_min / self.max_of_one_part)
+        self.max_number_of_parts = math.floor(self.quantized_max  / self.min_of_one_part)
+
+    def print_stats():
+        print(f"Energy mean = {self.mean}, std = {self.std}")
+        print(f"Energy min = {self.min}, max = {self.max}")
+        print(f"Particle energy min = {self.min_particle}, max = {self.max_particle}")
+        print(f"Scaling mean = {self.scaling_mean}, std = {self.scaling_std}, coeff of var = {self.scaling_std/self.scaling_mean}")
+        print(f"Scaled energy mean = {self.scaled_mean}, std = {self.scaled_std}")
+        print(f"Scaled energy min = {self.scaled_min}, std = {self.scaled_max}")
+        print(f"Quant energy mean = {self.quantized_mean}, std = {self.quantized_std}")
+        print(f"Quant energy min = {self.quantized_min}, max = {self.quantized_max}")
+        print(f"kmin = {self.min_of_one_part}, kmax = {self.max_of_one_part}")
+        print(f"parts min = {self.min_number_of_parts}, max = {self.max_number_of_parts}")
+
 
 high_speed_camera_df, sticky_paper_df, number_of_q_energy = read_arguments()
 
@@ -75,52 +104,8 @@ shift_splashes_no(sticky_paper_df)
 
 high_speed_camera_df = drop_outliers(high_speed_camera_df, 'v')
 
-energy_sum = energy_of_splashes(high_speed_camera_df)
-
-energy_mean = np.mean(energy_sum)
-energy_std = np.std(energy_sum)
-energy_min = np.min(energy_sum)
-energy_max = np.max(energy_sum)
-
-min_particle_energy = high_speed_camera_df['e'].min()
-max_particle_energy = high_speed_camera_df['e'].max()
-
-print(f"Energy mean = {energy_mean}, std = {energy_std}")
-print(f"Energy min = {energy_min}, max = {energy_max}\n")
-
-print(f"Particle energy min = {min_particle_energy}, max = {max_particle_energy}\n")
+self = EnergyStats(high_speed_camera_df, sticky_paper_df, number_of_q_energy)
 
 
-scaling_mean, scaling_std = mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, 1000)
 
-energy_scaled_mean = energy_mean * scaling_mean
-energy_scaled_std = energy_std * scaling_mean
-energy_scaled_min = energy_min * scaling_mean
-energy_scaled_max = energy_max * scaling_mean
-
-print(f"Scaling mean = {scaling_mean}, std = {scaling_std}, coeff of var = {scaling_std/scaling_mean}")
-print(f"Scaled energy mean = {energy_scaled_mean}, std = {energy_scaled_std}")
-print(f"Scaled energy min = {energy_scaled_min}, std = {energy_scaled_max}\n")
-
-
-quant_of_energy = energy_scaled_mean / number_of_q_energy
-
-energy_q_mean = energy_scaled_mean / quant_of_energy
-energy_q_std = energy_scaled_std / quant_of_energy
-energy_q_min = energy_scaled_min / quant_of_energy
-energy_q_max = energy_scaled_max / quant_of_energy
-
-print(f"Quant energy mean = {energy_q_mean}, std = {energy_q_std}")
-print(f"Quant energy min = {energy_q_min}, max = {energy_q_max}\n")
-
-min_energy_of_one_part = math.floor(min_particle_energy / quant_of_energy)
-max_energy_of_one_part = math.ceil(max_particle_energy / quant_of_energy)
-
-numMin = math.ceil(energy_q_min / max_energy_of_one_part)
-numMax = math.floor(energy_q_max  / min_energy_of_one_part)
-
-print(f"kmin = {min_energy_of_one_part}, kmax = {max_energy_of_one_part}")
-print(f"parts min = {numMin}, max = {numMax}\n")
-
-print(f"{number_of_q_energy} {energy_q_std:.4f} {energy_q_min:.4f} {energy_q_max:.4f} {min_energy_of_one_part} {max_energy_of_one_part} {numMin} {numMax}")
-
+print(f"{number_of_q_energy} {self.quantized_std:.4f} {self.quantized_min:.4f} {self.quantized_max:.4f} {self.min_of_one_part} {self.max_of_one_part}")
