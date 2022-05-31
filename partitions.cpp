@@ -85,27 +85,6 @@ class Partitions {
         }
 };
 
-// discrete normal distribution restricted to [ceil(min),floor(max)]
-std::vector<bigFloat> calculateNormalDiscrete(double mean, double std, double min, double max) {
-
-    int minCeil = ceil(min);
-    int maxFloor = floor(max);
-
-    std::vector<bigFloat> probabilities;
-    probabilities = std::vector<bigFloat>(maxFloor + 1, 0);
-    
-    boost::math::normal normal(mean,std);
-    double normalization = cdf(normal, max) - cdf(normal, min);
-
-    probabilities[minCeil] = cdf(normal, minCeil + 0.5) - cdf(normal, min);
-    probabilities[maxFloor] = cdf(normal, max) - cdf(normal, maxFloor - 0.5);
-
-    for(int i = minCeil + 1; i < maxFloor; ++i) {
-	    probabilities[i] = (cdf(normal, i + 0.5) - cdf(normal, i - 0.5)) / normalization;
-    }
-
-    return probabilities;
-}
 
 struct Parameters {
     int eMean;
@@ -133,6 +112,30 @@ struct Parameters {
     };
 };
 
+class DiscreteNormalDistribution {
+    public:
+        std::vector<bigFloat> distribution;
+        
+        DiscreteNormalDistribution(Parameters parameters) {
+            // discrete normal distribution restricted to [ceil(parameters.eMin),floor(parameters.eMax)]
+            // with mean and std equals to parameters.eMean and parameters.eStd
+            int minCeil = ceil(parameters.eMin);
+            int maxFloor = floor(parameters.eMax);
+
+            distribution = std::vector<bigFloat>(maxFloor + 1, 0);
+            
+            boost::math::normal normal(parameters.eMean,parameters.eStd);
+            double normalization = cdf(normal, parameters.eMax) - cdf(normal, parameters.eMin);
+
+            distribution[minCeil] = cdf(normal, minCeil + 0.5) - cdf(normal, parameters.eMin);
+            distribution[maxFloor] = cdf(normal, parameters.eMax) - cdf(normal, maxFloor - 0.5);
+
+            for(int i = minCeil + 1; i < maxFloor; ++i) {
+                distribution[i] = (cdf(normal, i + 0.5) - cdf(normal, i - 0.5)) / normalization;
+            }
+        }
+};
+
 
 int main(int argc, char* argv[]) {
 
@@ -141,40 +144,39 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
-    Parameters Params(argv);
+    Parameters parameters(argv);
 
-    std::vector<bigFloat> probabilitiesNormalDiscrete;
-    probabilitiesNormalDiscrete = calculateNormalDiscrete(Params.eMean, Params.eStd, Params.eMin, Params.eMax);
+    DiscreteNormalDistribution discreteNormalDistribution(parameters);
 
-    std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(Params.eMaxDiscrete + 1, 0);
+    std::vector<bigInt> sumsOfPartitions = std::vector<bigInt>(parameters.eMaxDiscrete + 1, 0);
 
-    Partitions P(Params.eMaxDiscrete, Params.numPartsMax, Params.partSizeMax);
+    Partitions P(parameters.eMaxDiscrete, parameters.numPartsMax, parameters.partSizeMax);
 
     // calculate partitions
-    for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
+    for(int energy = parameters.eMinDiscrete; energy <= parameters.eMaxDiscrete; ++energy) {
 		// if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)Params.partSizeMax); parts <= energy / Params.partSizeMin; ++parts) {
-            sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partSizeMin, Params.partSizeMax);
+        for(int parts = (int)ceil(energy / (double)parameters.partSizeMax); parts <= energy / parameters.partSizeMin; ++parts) {
+            sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, parameters.partSizeMin, parameters.partSizeMax);
 		}
 	}
 
-    std::vector<bigFloat> probabilitiesPartitions(Params.eMaxDiscrete + 1, 0);
+    std::vector<bigFloat> probabilitiesPartitions(parameters.eMaxDiscrete + 1, 0);
 
     // calculate distribution
-    for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
+    for(int energy = parameters.eMinDiscrete; energy <= parameters.eMaxDiscrete; ++energy) {
 		// if(energy % 1000 == 0) std::cout << energy << std::endl;
-        for(int parts = (int)ceil(energy / (double)Params.partSizeMax); parts <= energy / Params.partSizeMin; ++parts) {
-			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partSizeMin, Params.partSizeMax)
+        for(int parts = (int)ceil(energy / (double)parameters.partSizeMax); parts <= energy / parameters.partSizeMin; ++parts) {
+			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, parameters.partSizeMin, parameters.partSizeMax)
                                               / (bigFloat)sumsOfPartitions[energy]
-                                              * probabilitiesNormalDiscrete[energy];
+                                              * discreteNormalDistribution.distribution[energy];
 		}
 	}
 
     // print distribution
-    // std::cout << Params.numPartsMin << " " << Params.numPartsMax << std::endl;
+    // std::cout << parameters.numPartsMin << " " << parameters.numPartsMax << std::endl;
 	
     std::cout << "no,prob" << std::endl;
-	for(int parts = Params.numPartsMin; parts <= Params.numPartsMax; ++parts)
+	for(int parts = parameters.numPartsMin; parts <= parameters.numPartsMax; ++parts)
 		std::cout << parts << "," << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
 
 	return 0;
