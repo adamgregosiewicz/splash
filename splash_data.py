@@ -4,6 +4,8 @@ import random
 import sys
 import math
 
+# Just to remember: indices (indexing from 0) of sticky paper registered by hsc
+# indices_of_hsc_splashes_in_sp = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
 
 class Splashes:
     def __init__(self, argv):
@@ -102,9 +104,6 @@ sp_filename = sys.argv[2]
 number_of_quants_of_energy = int(sys.argv[3])
 
 splashes = Splashes([hsc_filename, sp_filename, number_of_quants_of_energy])
-
-# indices of sticky paper registered by hsc
-# indices_of_hsc_splashes_in_sp = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
 
 splashes.drop_velocity_outliers_of_hsc()
 
