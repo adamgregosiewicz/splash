@@ -201,7 +201,9 @@ int main(int argc, char* argv[]) {
 
     Parameters parameters(argv);
     DiscreteNormalDistribution discreteNormalDistribution(parameters.eMean, parameters.eStd, parameters.eMin, parameters.eMax);
-    Partitions partitions(parameters.eMinDiscrete, parameters.eMaxDiscrete, parameters.numPartsMin, parameters.numPartsMax, parameters.partSizeMin, parameters.partSizeMax);
+    Partitions partitions(parameters.eMinDiscrete, parameters.eMaxDiscrete,
+                          parameters.numPartsMin, parameters.numPartsMax,
+                          parameters.partSizeMin, parameters.partSizeMax);
     partitions.calculateCumulativePartitions();
     IntegerPartitionDistribution integerPartitionDistribution(partitions, discreteNormalDistribution);
     integerPartitionDistribution.printDistribution();
