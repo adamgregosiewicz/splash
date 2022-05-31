@@ -32,10 +32,19 @@ class vector3d {
 class Partitions {
     private:
         vector3d<bigInt> partitionsMatrix;
+        size_t minNumber;
+        size_t maxNumber;
+        size_t numPartMin;
+        size_t numPartMax;
+        size_t partSizeMin;
+        size_t partSizeMax;
 
     public:
+        std::vector<bigInt> cumulativePartitions;
+
         Partitions(size_t maxNumber, size_t numPartsMax, size_t partSizeMax) {
             partitionsMatrix = vector3d<bigInt>(maxNumber + 1, numPartsMax + 1, partSizeMax + 1, 0);
+            cumulativePartitions = std::vector<bigInt>(maxNumber + 1, 0);
         }
 
         bigInt numberOfPartitions(size_t number, size_t parts, size_t partSizeMax) {
