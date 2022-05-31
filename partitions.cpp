@@ -143,6 +143,12 @@ class DiscreteDistribution {
         std::vector<bigFloat> distribution;
         size_t min;
         size_t max;
+
+        void printDistribution() {
+                std::cout << "no,prob" << std::endl;
+                for(int i = min; i <= max; ++i)
+                    std::cout << i << "," << std::setprecision(10) << distribution[i] << std::endl;
+        }
 };
 
 class DiscreteNormalDistribution: public DiscreteDistribution {
@@ -198,10 +204,7 @@ int main(int argc, char* argv[]) {
     Partitions partitions(parameters.eMinDiscrete, parameters.eMaxDiscrete, parameters.numPartsMin, parameters.numPartsMax, parameters.partSizeMin, parameters.partSizeMax);
     partitions.calculateCumulativePartitions();
     IntegerPartitionDistribution integerPartitionDistribution(partitions, discreteNormalDistribution);
-	
-    std::cout << "no,prob" << std::endl;
-	for(int parts = parameters.numPartsMin; parts <= parameters.numPartsMax; ++parts)
-		std::cout << parts << "," << std::setprecision(10) << integerPartitionDistribution.distribution[parts] << std::endl;
+    integerPartitionDistribution.printDistribution();
 
 	return 0;
 }
