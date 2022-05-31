@@ -5,67 +5,69 @@ import sys
 import math
 
 
-def outliers_of_df(df):
-    """
-    Return outliers in DataFrame based on interquartile range (IQR).
-    https://careerfoundry.com/en/blog/data-analytics/how-to-find-outliers/
-    """
-    q1 = df.quantile(0.20)
-    q3 = df.quantile(0.80)
-    iqr = q3 - q1
-    
-    outliers = df[((df < (q1 - 1.5 * iqr)) | (df > (q3 + 1.5 * iqr)))]
+class Splashes():
+    def __init__(self, argv):
+        """
+        Take CSV DataFrames for HSC and SP data and the number of quants of energy.
+        Index splashes from 0 and not from 1.
+        """
+        self.high_speed_camera_df = pd.read_csv(argv[0])
+        self.sticky_paper_df = pd.read_csv(argv[1])
+        self.number_of_quants_of_energy = int(argv[2])
+        self.__shift_splashes_numbers()
 
-    return outliers
+    def __shift_splashes_numbers(self):
+        """
+        Index splashes from 0 and not from 1.
+        """
+        self.high_speed_camera_df['no'] -= 1
+        self.sticky_paper_df['no'] -= 1
 
+    def __velocity_outliers_of_hsc(self):
+        """
+        Return (indices of) outliers in DataFrame based on interquartile range (IQR).
+        https://careerfoundry.com/en/blog/data-analytics/how-to-find-outliers/
+        """
+        q1 = self.high_speed_camera_df['v'].quantile(0.20)
+        q3 = self.high_speed_camera_df['v'].quantile(0.80)
+        iqr = q3 - q1
+        
+        outliers = self.high_speed_camera_df['v'][((self.high_speed_camera_df['v'] < (q1 - 1.5 * iqr))
+                                                 | (self.high_speed_camera_df['v'] > (q3 + 1.5 * iqr)))]
 
-def drop_outliers(df, column):
-    """
-    Return df with dropped outliers with respect to given column.
-    """
-    return df.drop(outliers_of_df(df[column]).index.tolist())
-
-
-def mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, sample_count):
-    """
-    Return mean and std of the random quotient of cardinalities of SP and HSC splashes.
-
-    Since there are only 16 splashes recorded by HSC we take a random sample of 16 splashes
-    recorder by SP and divide the sum of beads in these 16 splashes by the sum of beads in
-    all HSC splashes.
-    """
-    
-    high_speed_camera_sum = sum([len(high_speed_camera_df[high_speed_camera_df['no'] == i]) for i in range(16)])
-    sticky_paper_cardinalities = [len(sticky_paper_df[sticky_paper_df['no'] == i]) for i in range(48)]
-    sp_hsc_quotient = [sum(random.sample(sticky_paper_cardinalities, 16)) / high_speed_camera_sum for i in range(sample_count)]
-
-    return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
+        return outliers
 
 
-def shift_splashes_no(splashes_df):
-    """
-    Index splashes from 0 and not from 1.
-    """
-    splashes_df['no'] -= 1
+    def drop_velocity_outliers_of_hsc(self):
+        self.high_speed_camera_df = self.high_speed_camera_df.drop(self.__velocity_outliers_of_hsc().index.tolist())
 
 
-def read_arguments():
-    """
-    Return CSV DataFrames for HSC and SP data and the number of quants of energy
-    """
-    return pd.read_csv(sys.argv[1]), pd.read_csv(sys.argv[2]), int(sys.argv[3])
+    def mean_std_sp_to_hsc_cardinality(self, sample_count):
+        """
+        Return mean and std of the random quotient of cardinalities of SP and HSC splashes.
+
+        Since there are only 16 splashes recorded by HSC we take a random sample of 16 splashes
+        recorder by SP and divide the sum of beads in these 16 splashes by the sum of beads in
+        all HSC splashes.
+        """
+        
+        high_speed_camera_sum = sum([len(self.high_speed_camera_df[self.high_speed_camera_df['no'] == i]) for i in range(16)])
+        sticky_paper_cardinalities = [len(self.sticky_paper_df[self.sticky_paper_df['no'] == i]) for i in range(48)]
+        sp_hsc_quotient = [sum(random.sample(sticky_paper_cardinalities, 16)) / high_speed_camera_sum for i in range(sample_count)]
+
+        return np.mean(sp_hsc_quotient), np.std(sp_hsc_quotient)
 
 
 class EnergyStats():
-    def __init__(self, splashes_hsc_df, splashes_sp_df, number_of_quants_of_energy):
-        self.sum = [splashes_hsc_df[splashes_hsc_df['no'] == i]['e'].sum() for i in range(16)]
+    def __init__(self, splashes: Splashes):
+        self.sum = [splashes.high_speed_camera_df[splashes.high_speed_camera_df['no'] == i]['e'].sum() for i in range(16)]
         self.mean = np.mean(self.sum)
         self.std = np.std(self.sum)
         self.min = np.min(self.sum)
         self.max = np.max(self.sum)
-        self.min_particle = np.min(high_speed_camera_df['e'])
-        self.max_particle = np.max(high_speed_camera_df['e'])
-        self.scaling_mean, self.scaling_std = mean_std_sp_to_hsc_cardinality(splashes_sp_df, splashes_hsc_df, 1000)
+        self.min_particle = np.min(splashes.high_speed_camera_df['e'])
+        self.max_particle = np.max(splashes.high_speed_camera_df['e'])
+        self.scaling_mean, self.scaling_std = splashes.mean_std_sp_to_hsc_cardinality(1000)
         self.scaled_mean = self.mean * self.scaling_mean
         self.scaled_std = self.std * self.scaling_mean
         self.scaled_min = self.min * self.scaling_mean
@@ -80,7 +82,7 @@ class EnergyStats():
         self.min_number_of_parts = math.ceil(self.quantized_min / self.max_of_one_part)
         self.max_number_of_parts = math.floor(self.quantized_max  / self.min_of_one_part)
 
-    def print_stats():
+    def print_stats(self):
         print(f"Energy mean = {self.mean}, std = {self.std}")
         print(f"Energy min = {self.min}, max = {self.max}")
         print(f"Particle energy min = {self.min_particle}, max = {self.max_particle}")
@@ -93,19 +95,17 @@ class EnergyStats():
         print(f"parts min = {self.min_number_of_parts}, max = {self.max_number_of_parts}")
 
 
-high_speed_camera_df, sticky_paper_df, number_of_q_energy = read_arguments()
+hsc_filename = sys.argv[1]
+sp_filename = sys.argv[2]
+number_of_quants_of_energy = int(sys.argv[3])
 
-shift_splashes_no(high_speed_camera_df)
-shift_splashes_no(sticky_paper_df)
+splashes = Splashes([hsc_filename, sp_filename, number_of_quants_of_energy])
 
 # indices of sticky paper registered by hsc
 # indices_of_hsc_splashes_in_sp = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
 
+splashes.drop_velocity_outliers_of_hsc()
 
-high_speed_camera_df = drop_outliers(high_speed_camera_df, 'v')
+energy_stats = EnergyStats(splashes)
 
-self = EnergyStats(high_speed_camera_df, sticky_paper_df, number_of_q_energy)
-
-
-
-print(f"{number_of_q_energy} {self.quantized_std:.4f} {self.quantized_min:.4f} {self.quantized_max:.4f} {self.min_of_one_part} {self.max_of_one_part}")
+print(f"{splashes.number_of_quants_of_energy} {energy_stats.quantized_std:.4f} {energy_stats.quantized_min:.4f} {energy_stats.quantized_max:.4f} {energy_stats.min_of_one_part} {energy_stats.max_of_one_part}")
