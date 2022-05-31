@@ -27,13 +27,13 @@ class Splashes:
         self.high_speed_camera_df['no'] -= 1
         self.sticky_paper_df['no'] -= 1
 
-    def __velocity_outliers_of_hsc(self):
+    def __velocity_outliers_of_hsc(self, quantile: float):
         """
         Return (indices of) outliers in DataFrame based on inter-quartile range (IQR).
         https://careerfoundry.com/en/blog/data-analytics/how-to-find-outliers/
         """
-        q1 = self.high_speed_camera_df['v'].quantile(0.20)
-        q3 = self.high_speed_camera_df['v'].quantile(0.80)
+        q1 = self.high_speed_camera_df['v'].quantile(quantile)
+        q3 = self.high_speed_camera_df['v'].quantile(1 - quantile)
         iqr = q3 - q1
 
         outliers = self.high_speed_camera_df['v'][((self.high_speed_camera_df['v'] < (q1 - 1.5 * iqr))
@@ -41,8 +41,8 @@ class Splashes:
 
         return outliers
 
-    def drop_velocity_outliers_of_hsc(self):
-        self.high_speed_camera_df = self.high_speed_camera_df.drop(self.__velocity_outliers_of_hsc().index.tolist())
+    def drop_velocity_outliers_of_hsc(self, quantile: float):
+        self.high_speed_camera_df = self.high_speed_camera_df.drop(self.__velocity_outliers_of_hsc(quantile).index.tolist())
 
     def mean_std_sp_to_hsc_cardinality(self, sample_count):
         """
@@ -108,7 +108,7 @@ def main():
 
     splashes = Splashes([hsc_filename, sp_filename, number_of_quants_of_energy])
 
-    splashes.drop_velocity_outliers_of_hsc()
+    splashes.drop_velocity_outliers_of_hsc(0.25)
 
     energy_stats = EnergyStats(splashes)
 
