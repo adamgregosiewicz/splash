@@ -152,7 +152,7 @@ int main(int argc, char* argv[]) {
 
     // calculate partitions
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
-		if(energy % 1000 == 0) std::cout << energy << std::endl;
+		// if(energy % 1000 == 0) std::cout << energy << std::endl;
         for(int parts = (int)ceil(energy / (double)Params.partSizeMax); parts <= energy / Params.partSizeMin; ++parts) {
             sumsOfPartitions[energy] += P.numberOfPartitions(energy, parts, Params.partSizeMin, Params.partSizeMax);
 		}
@@ -162,7 +162,7 @@ int main(int argc, char* argv[]) {
 
     // calculate distribution
     for(int energy = Params.eMinDiscrete; energy <= Params.eMaxDiscrete; ++energy) {
-		if(energy % 1000 == 0) std::cout << energy << std::endl;
+		// if(energy % 1000 == 0) std::cout << energy << std::endl;
         for(int parts = (int)ceil(energy / (double)Params.partSizeMax); parts <= energy / Params.partSizeMin; ++parts) {
 			probabilitiesPartitions[parts] += (bigFloat)P.numberOfPartitions(energy, parts, Params.partSizeMin, Params.partSizeMax)
                                               / (bigFloat)sumsOfPartitions[energy]
@@ -171,8 +171,9 @@ int main(int argc, char* argv[]) {
 	}
 
     // print distribution
-    std::cout << Params.numPartsMin << " " << Params.numPartsMax << std::endl;
+    // std::cout << Params.numPartsMin << " " << Params.numPartsMax << std::endl;
 	
+    std::cout << "no,prob" << std::endl;
 	for(int parts = Params.numPartsMin; parts <= Params.numPartsMax; ++parts)
 		std::cout << parts << "," << std::setprecision(10) << probabilitiesPartitions[parts] << std::endl;
 
