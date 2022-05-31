@@ -113,16 +113,16 @@ class Partitions {
 
 
 struct Parameters {
-    int eMean;
+    size_t eMean;
     double eStd;
     double eMin;
     double eMax;
-    int eMinDiscrete;
-    int eMaxDiscrete;
-    int numPartsMin;
-    int numPartsMax;
-    int partSizeMin;
-    int partSizeMax;
+    size_t eMinDiscrete;
+    size_t eMaxDiscrete;
+    size_t numPartsMin;
+    size_t numPartsMax;
+    size_t partSizeMin;
+    size_t partSizeMax;
 
     Parameters(char* argv[]) {
         eMean = atoi(argv[1]);
@@ -131,8 +131,8 @@ struct Parameters {
         eMax = atof(argv[4]);
         partSizeMin = atoi(argv[5]);
         partSizeMax = atoi(argv[6]);
-        eMinDiscrete = (int)ceil(eMin);
-        eMaxDiscrete = (int)floor(eMax);
+        eMinDiscrete = (size_t)ceil(eMin);
+        eMaxDiscrete = (size_t)floor(eMax);
         numPartsMin = (size_t)ceil(eMin / (double)partSizeMax);
         numPartsMax = (size_t)floor(eMax / (double)partSizeMin);
     };
@@ -178,8 +178,8 @@ class IntegerPartitionDistribution: public DiscreteDistribution {
             for(size_t number = partitions.minNumber; number <= partitions.maxNumber; ++number) {
                 for(size_t parts = (int)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
                     distribution[parts] += (bigFloat)partitions.numberOfPartitions(number, parts, partitions.partSizeMin, partitions.partSizeMax)
-                                              / (bigFloat)partitions.cumulativePartitions[number]
-                                              * discreteDistribution.distribution[number];
+                                            / (bigFloat)partitions.cumulativePartitions[number]
+                                            * discreteDistribution.distribution[number];
 		        }
 	        }
         }
@@ -194,19 +194,15 @@ int main(int argc, char* argv[]) {
     }
 
     Parameters parameters(argv);
-
     DiscreteNormalDistribution discreteNormalDistribution(parameters);
-
-    Partitions P(parameters.eMinDiscrete,
-                 parameters.eMaxDiscrete,
-                 parameters.numPartsMin,
-                 parameters.numPartsMax,
-                 parameters.partSizeMin,
-                 parameters.partSizeMax);
-
-    P.calculateCumulativePartitions();
-
-    IntegerPartitionDistribution integerPartitionDistribution(P, discreteNormalDistribution);
+    Partitions partitions(parameters.eMinDiscrete,
+                          parameters.eMaxDiscrete,
+                          parameters.numPartsMin,
+                          parameters.numPartsMax,
+                          parameters.partSizeMin,
+                          parameters.partSizeMax);
+    partitions.calculateCumulativePartitions();
+    IntegerPartitionDistribution integerPartitionDistribution(partitions, discreteNormalDistribution);
 	
     std::cout << "no,prob" << std::endl;
 	for(int parts = parameters.numPartsMin; parts <= parameters.numPartsMax; ++parts)
