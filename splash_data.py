@@ -82,13 +82,13 @@ energy_std = np.std(energy_sum)
 energy_min = np.min(energy_sum)
 energy_max = np.max(energy_sum)
 
-energy_p_min = high_speed_camera_df['e'].min()
-energy_p_max = high_speed_camera_df['e'].max()
+min_particle_energy = high_speed_camera_df['e'].min()
+max_particle_energy = high_speed_camera_df['e'].max()
 
 print(f"Energy mean = {energy_mean}, std = {energy_std}")
 print(f"Energy min = {energy_min}, max = {energy_max}\n")
 
-print(f"Particle energy min = {energy_p_min}, max = {energy_p_max}\n")
+print(f"Particle energy min = {min_particle_energy}, max = {max_particle_energy}\n")
 
 
 scaling_mean, scaling_std = mean_std_sp_to_hsc_cardinality(sticky_paper_df, high_speed_camera_df, 1000)
@@ -103,24 +103,24 @@ print(f"Scaled energy mean = {energy_scaled_mean}, std = {energy_scaled_std}")
 print(f"Scaled energy min = {energy_scaled_min}, std = {energy_scaled_max}\n")
 
 
-q = energy_scaled_mean / number_of_q_energy
+quant_of_energy = energy_scaled_mean / number_of_q_energy
 
-energy_q_mean = energy_scaled_mean / q
-energy_q_std = energy_scaled_std / q
-energy_q_min = energy_scaled_min / q
-energy_q_max = energy_scaled_max / q
+energy_q_mean = energy_scaled_mean / quant_of_energy
+energy_q_std = energy_scaled_std / quant_of_energy
+energy_q_min = energy_scaled_min / quant_of_energy
+energy_q_max = energy_scaled_max / quant_of_energy
 
 print(f"Quant energy mean = {energy_q_mean}, std = {energy_q_std}")
 print(f"Quant energy min = {energy_q_min}, max = {energy_q_max}\n")
 
-kmin = math.floor(energy_p_min / q)
-kmax = math.ceil(energy_p_max / q)
+min_energy_of_one_part = math.floor(min_particle_energy / quant_of_energy)
+max_energy_of_one_part = math.ceil(max_particle_energy / quant_of_energy)
 
-numMin = math.ceil(energy_q_min / kmax)
-numMax = math.floor(energy_q_max  / kmin)
+numMin = math.ceil(energy_q_min / max_energy_of_one_part)
+numMax = math.floor(energy_q_max  / min_energy_of_one_part)
 
-print(f"kmin = {kmin}, kmax = {kmax}")
+print(f"kmin = {min_energy_of_one_part}, kmax = {max_energy_of_one_part}")
 print(f"parts min = {numMin}, max = {numMax}\n")
 
-print(f"{number_of_q_energy} {energy_q_std:.4f} {energy_q_min:.4f} {energy_q_max:.4f} {kmin} {kmax} {numMin} {numMax}")
+print(f"{number_of_q_energy} {energy_q_std:.4f} {energy_q_min:.4f} {energy_q_max:.4f} {min_energy_of_one_part} {max_energy_of_one_part} {numMin} {numMax}")
 
