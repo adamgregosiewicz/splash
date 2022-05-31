@@ -147,19 +147,19 @@ class DiscreteDistribution {
 
 class DiscreteNormalDistribution: public DiscreteDistribution {
     public:
-        DiscreteNormalDistribution(Parameters parameters) {
-            // discrete normal distribution restricted to [ceil(parameters.eMin),floor(parameters.eMax)]
-            // with mean and std equals to parameters.eMean and parameters.eStd
-            min = ceil(parameters.eMin);
-            max = floor(parameters.eMax);
+        DiscreteNormalDistribution(size_t mean, double std, double minValue, double maxValue) {
+            // discrete normal distribution restricted to [ceil(minValue),floor(maxValue)]
+            // with mean and std equals to mean and std
+            min = ceil(minValue);
+            max = floor(maxValue);
 
             distribution = std::vector<bigFloat>(max + 1, 0);
             
-            boost::math::normal normal(parameters.eMean,parameters.eStd);
-            double normalization = cdf(normal, parameters.eMax) - cdf(normal, parameters.eMin);
+            boost::math::normal normal(mean, std);
+            double normalization = cdf(normal, maxValue) - cdf(normal, minValue);
 
-            distribution[min] = cdf(normal, min + 0.5) - cdf(normal, parameters.eMin);
-            distribution[max] = cdf(normal, parameters.eMax) - cdf(normal, max - 0.5);
+            distribution[min] = cdf(normal, min + 0.5) - cdf(normal, minValue);
+            distribution[max] = cdf(normal, maxValue) - cdf(normal, max - 0.5);
 
             for(size_t i = min + 1; i < max; ++i) {
                 distribution[i] = (cdf(normal, i + 0.5) - cdf(normal, i - 0.5)) / normalization;
@@ -171,9 +171,9 @@ class IntegerPartitionDistribution: public DiscreteDistribution {
     public:
         // calculate integer partition distribution conditional on a given discrete distribution
         IntegerPartitionDistribution(Partitions partitions, DiscreteDistribution discreteDistribution) {
-            min = partitions.minNumber;
-            max = partitions.maxNumber;
-            distribution = std::vector<bigFloat>(max + 1, 0);
+            min = partitions.numPartMin;
+            max = partitions.numPartMax;
+            distribution = std::vector<bigFloat>(partitions.maxNumber + 1, 0);
 
             for(size_t number = partitions.minNumber; number <= partitions.maxNumber; ++number) {
                 for(size_t parts = (int)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
@@ -194,13 +194,8 @@ int main(int argc, char* argv[]) {
     }
 
     Parameters parameters(argv);
-    DiscreteNormalDistribution discreteNormalDistribution(parameters);
-    Partitions partitions(parameters.eMinDiscrete,
-                          parameters.eMaxDiscrete,
-                          parameters.numPartsMin,
-                          parameters.numPartsMax,
-                          parameters.partSizeMin,
-                          parameters.partSizeMax);
+    DiscreteNormalDistribution discreteNormalDistribution(parameters.eMean, parameters.eStd, parameters.eMin, parameters.eMax);
+    Partitions partitions(parameters.eMinDiscrete, parameters.eMaxDiscrete, parameters.numPartsMin, parameters.numPartsMax, parameters.partSizeMin, parameters.partSizeMax);
     partitions.calculateCumulativePartitions();
     IntegerPartitionDistribution integerPartitionDistribution(partitions, discreteNormalDistribution);
 	
