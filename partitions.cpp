@@ -36,8 +36,8 @@ class Partitions {
     public:
         size_t minNumber;
         size_t maxNumber;
-        size_t numPartMin;
-        size_t numPartMax;
+        size_t numPartsMin;
+        size_t numPartsMax;
         size_t partSizeMin;
         size_t partSizeMax;
         std::vector<bigInt> cumulativePartitions;
@@ -45,8 +45,8 @@ class Partitions {
         Partitions(size_t minNumber, size_t maxNumber, size_t numPartsMin, size_t numPartsMax, size_t partSizeMin, size_t partSizeMax):
             minNumber(minNumber),
             maxNumber(maxNumber),
-            numPartMin(numPartMin),
-            numPartMax(numPartMax),
+            numPartsMin(numPartsMin),
+            numPartsMax(numPartsMax),
             partSizeMin(partSizeMin),
             partSizeMax(partSizeMax)
         {
@@ -104,7 +104,7 @@ class Partitions {
         void calculateCumulativePartitions() {
             for(size_t number = minNumber; number <= maxNumber; ++number) {
                 // if(number % 100 == 0) std::cout << number << std::endl;
-                for(size_t parts = (int)ceil(number / (double)partSizeMax); parts <= number / partSizeMin; ++parts) {
+                for(size_t parts = (size_t)ceil(number / (double)partSizeMax); parts <= number / partSizeMin; ++parts) {
                     cumulativePartitions[number] += numberOfPartitions(number, parts, partSizeMin, partSizeMax);
 		        }
 	        }
@@ -146,7 +146,7 @@ class DiscreteDistribution {
 
         void printDistribution() {
                 std::cout << "no,prob" << std::endl;
-                for(int i = min; i <= max; ++i)
+                for(size_t i = min; i <= max; ++i)
                     std::cout << i << "," << std::setprecision(10) << distribution[i] << std::endl;
         }
 };
@@ -177,12 +177,12 @@ class IntegerPartitionDistribution: public DiscreteDistribution {
     public:
         // calculate integer partition distribution conditional on a given discrete distribution
         IntegerPartitionDistribution(Partitions partitions, DiscreteDistribution discreteDistribution) {
-            min = partitions.numPartMin;
-            max = partitions.numPartMax;
+            min = partitions.numPartsMin;
+            max = partitions.numPartsMax;
             distribution = std::vector<bigFloat>(partitions.maxNumber + 1, 0);
 
             for(size_t number = partitions.minNumber; number <= partitions.maxNumber; ++number) {
-                for(size_t parts = (int)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
+                for(size_t parts = (size_t)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
                     distribution[parts] += (bigFloat)partitions.numberOfPartitions(number, parts, partitions.partSizeMin, partitions.partSizeMax)
                                             / (bigFloat)partitions.cumulativePartitions[number]
                                             * discreteDistribution.distribution[number];
