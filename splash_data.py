@@ -4,8 +4,10 @@ import random
 import sys
 import math
 
+
 # Just to remember: indices (indexing from 0) of sticky paper registered by hsc
 # indices_of_hsc_splashes_in_sp = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
+
 
 class Splashes:
     def __init__(self, argv):
@@ -99,19 +101,20 @@ class EnergyStats:
         print(f"Number of parts min = {self.min_number_of_parts}, max = {self.max_number_of_parts}")
 
 
-hsc_filename = sys.argv[1]
-sp_filename = sys.argv[2]
-number_of_quants_of_energy = int(sys.argv[3])
+def main():
+    hsc_filename = sys.argv[1]
+    sp_filename = sys.argv[2]
+    number_of_quants_of_energy = int(sys.argv[3])
 
-splashes = Splashes([hsc_filename, sp_filename, number_of_quants_of_energy])
+    splashes = Splashes([hsc_filename, sp_filename, number_of_quants_of_energy])
 
-splashes.drop_velocity_outliers_of_hsc()
+    splashes.drop_velocity_outliers_of_hsc()
 
-energy_stats = EnergyStats(splashes)
+    energy_stats = EnergyStats(splashes)
 
-print(f"{splashes.number_of_quants_of_energy} "
-      f"{energy_stats.quantized_std:.4f} "
-      f"{energy_stats.quantized_min:.4f} "
-      f"{energy_stats.quantized_max:.4f} "
-      f"{energy_stats.min_of_one_part} "
-      f"{energy_stats.max_of_one_part}")
+    print(f"{splashes.number_of_quants_of_energy} "
+          f"{energy_stats.quantized_std:.4f} "
+          f"{energy_stats.quantized_min:.4f} "
+          f"{energy_stats.quantized_max:.4f} "
+          f"{energy_stats.min_of_one_part} "
+          f"{energy_stats.max_of_one_part}")
