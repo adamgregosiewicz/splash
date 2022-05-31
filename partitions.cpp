@@ -32,14 +32,14 @@ class vector3d {
 class Partitions {
     private:
         vector3d<bigInt> partitionsMatrix;
+
+    public:
         size_t minNumber;
         size_t maxNumber;
         size_t numPartMin;
         size_t numPartMax;
         size_t partSizeMin;
         size_t partSizeMax;
-
-    public:
         std::vector<bigInt> cumulativePartitions;
 
         Partitions(size_t maxNumber, size_t numPartsMax, size_t partSizeMax) {
@@ -121,27 +121,47 @@ struct Parameters {
     };
 };
 
-class DiscreteNormalDistribution {
+class DiscreteDistribution {
     public:
         std::vector<bigFloat> distribution;
-        
+        size_t min;
+        size_t max;
+};
+
+class DiscreteNormalDistribution: public DiscreteDistribution {
+    public:
         DiscreteNormalDistribution(Parameters parameters) {
             // discrete normal distribution restricted to [ceil(parameters.eMin),floor(parameters.eMax)]
             // with mean and std equals to parameters.eMean and parameters.eStd
-            int minCeil = ceil(parameters.eMin);
-            int maxFloor = floor(parameters.eMax);
+            min = ceil(parameters.eMin);
+            max = floor(parameters.eMax);
 
-            distribution = std::vector<bigFloat>(maxFloor + 1, 0);
+            distribution = std::vector<bigFloat>(max + 1, 0);
             
             boost::math::normal normal(parameters.eMean,parameters.eStd);
             double normalization = cdf(normal, parameters.eMax) - cdf(normal, parameters.eMin);
 
-            distribution[minCeil] = cdf(normal, minCeil + 0.5) - cdf(normal, parameters.eMin);
-            distribution[maxFloor] = cdf(normal, parameters.eMax) - cdf(normal, maxFloor - 0.5);
+            distribution[min] = cdf(normal, min + 0.5) - cdf(normal, parameters.eMin);
+            distribution[max] = cdf(normal, parameters.eMax) - cdf(normal, max - 0.5);
 
-            for(int i = minCeil + 1; i < maxFloor; ++i) {
+            for(size_t i = min + 1; i < max; ++i) {
                 distribution[i] = (cdf(normal, i + 0.5) - cdf(normal, i - 0.5)) / normalization;
             }
+        }
+};
+
+class IntegerPartitionDistribution: public DiscreteDistribution {
+    public:
+        IntegerPartitionDistribution(Partitions partitions) {
+            min = partitions.minNumber;
+            max = partitions.maxNumber;
+
+            for(size_t number = partitions.minNumber; number <= partitions.maxNumber; ++number) {
+                // if(energy % 1000 == 0) std::cout << energy << std::endl;
+                for(size_t parts = (int)ceil(number / (double)partitions.partSizeMax); parts <= number / partitions.partSizeMin; ++parts) {
+                    partitions.cumulativePartitions[number] += partitions.numberOfPartitions(number, parts, partitions.partSizeMin, partitions.partSizeMax);
+		        }
+	        }
         }
 };
 
