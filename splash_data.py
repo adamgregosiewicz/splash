@@ -51,7 +51,7 @@ def energy_of_splashes(splashes_df):
 
 def shift_splashes_no(splashes_df):
     """
-    Count splashes from 0 and not from 1.
+    Index splashes from 0 and not from 1.
     """
     splashes_df['no'] -= 1
 
@@ -69,11 +69,10 @@ high_speed_camera_df, sticky_paper_df, number_of_q_energy = read_arguments()
 shift_splashes_no(high_speed_camera_df)
 shift_splashes_no(sticky_paper_df)
 
-# indicies of sticky paper registered by hsc
-no_of_hsc = [1,2,3,4,5,7,8,9,10,11,12,13,14,16,17,18]
+# indices of sticky paper registered by hsc
+# indices_of_hsc_splashes_in_sp = [1, 2, 3, 4, 5, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18]
 
 
-# outliers handling
 high_speed_camera_df = drop_outliers(high_speed_camera_df, 'v')
 
 energy_sum = energy_of_splashes(high_speed_camera_df)
