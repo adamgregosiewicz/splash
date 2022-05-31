@@ -56,10 +56,15 @@ def shift_splashes_no(splashes_df):
     splashes_df['no'] -= 1
 
 
-high_speed_camera_df = pd.read_csv(sys.argv[1])
-sticky_paper_df = pd.read_csv(sys.argv[2])
-Q = int(sys.argv[3])
+def read_arguments():
+    """
+    Return CSV DataFrames for HSC and SP data and the number of quants of energy
+    """
+    return pd.read_csv(sys.argv[1]), pd.read_csv(sys.argv[2]), int(sys.argv[3])
 
+
+
+high_speed_camera_df, sticky_paper_df, number_of_q_energy = read_arguments()
 
 shift_splashes_no(high_speed_camera_df)
 shift_splashes_no(sticky_paper_df)
