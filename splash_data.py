@@ -104,7 +104,7 @@ print(f"Scaled energy mean = {energy_scaled_mean}, std = {energy_scaled_std}")
 print(f"Scaled energy min = {energy_scaled_min}, std = {energy_scaled_max}\n")
 
 
-q = energy_scaled_mean / Q
+q = energy_scaled_mean / number_of_q_energy
 
 energy_q_mean = energy_scaled_mean / q
 energy_q_std = energy_scaled_std / q
@@ -123,5 +123,5 @@ numMax = math.floor(energy_q_max  / kmin)
 print(f"kmin = {kmin}, kmax = {kmax}")
 print(f"parts min = {numMin}, max = {numMax}\n")
 
-print(f"{Q} {energy_q_std:.4f} {energy_q_min:.4f} {energy_q_max:.4f} {kmin} {kmax} {numMin} {numMax}")
+print(f"{number_of_q_energy} {energy_q_std:.4f} {energy_q_min:.4f} {energy_q_max:.4f} {kmin} {kmax} {numMin} {numMax}")
 
