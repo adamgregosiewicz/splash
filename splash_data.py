@@ -118,3 +118,5 @@ def main():
           f"{energy_stats.quantized_max:.4f} "
           f"{energy_stats.min_of_one_part} "
           f"{energy_stats.max_of_one_part}")
+
+main()
