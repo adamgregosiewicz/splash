@@ -1,5 +1,6 @@
 import numpy as np
 import pandas as pd
+import os
 import sys
 import scipy.stats as stats
 import matplotlib.pyplot as plt
@@ -240,4 +241,4 @@ ax.set_xlabel('Number of beads')
 ax.set_ylabel('Cumulative distribution function')
 
 plt.xlim(x_min, x_max)
-plt.show()
+plt.savefig(os.path.splitext(model_filename)[0] + '.svg', format='svg', dpi=1200)
