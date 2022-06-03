@@ -173,6 +173,34 @@ def cdf_for_plot(values, args=None):
     
     return cdf_support, cdf_values
 
+def extend_cdf_for_plot(x, y, x_min, x_max):
+    x = [x_min] + x
+    y = [0.0] + y
+    x = x + [x_max]
+    y = y + [1.0]
+    return x, y
+
+def print_cdf(x_1, y_1, x_2, y_2, x_min, x_max, x_axis_label, y_axis_label, filename):
+    _, ax = plt.subplots()
+    ax.set_yticks([0.0, 1.0], minor=False)
+    ax.set_yticks([0.2, 0.4, 0.6, 0.8], minor=True)
+    ax.yaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
+    ax.yaxis.grid(True, which='major')
+    ax.legend(loc='right')
+    ax.set_xlabel(x_axis_label)
+    ax.set_ylabel(y_axis_label)
+
+    x_1, y_1 = cdf_for_plot(y_1, x_1)
+    x_1, y_1 = extend_cdf_for_plot(x_1, y_1, x_min, x_max)
+
+    x_2, y_2 = cdf_for_plot(y_2, x_2)
+    x_2, y_2 = extend_cdf_for_plot(x_2, y_2, x_min, x_max)
+
+    ax.plot(x_1, y_1, color='red', label='Model')
+    ax.plot(x_2, y_2, color='black', label='Experiment')
+
+    plt.xlim(x_min, x_max)
+    plt.savefig(filename + '_uniform.svg', format='svg', dpi=1200)
 
 # read data from files
 empirical_filename = sys.argv[1]  # empirical data
@@ -209,6 +237,8 @@ x_model = list(model_df.iloc[:, 0])
 y_model = list(model_df.iloc[:, 1])
 
 x_model, y_model = cdf_for_plot(y_model, x_model)
+x_sticky_paper, y_sticky_paper = cdf_for_plot(sticky_paper_card_sorted)
+print_cdf(x_model, y_model, x_sticky_paper, y_sticky_paper, x_model[0], x_model[-1], os.path.splitext(model_filename)[0])
 
 # extend CDF to the left
 shift = 5
@@ -219,7 +249,7 @@ y_model = [0.0] + y_model
 
 # STICKY PAPER
 
-x_sticky_paper, y_sticky_paper = cdf_for_plot(sticky_paper_card_sorted)
+
 
 # extend CDF to the left and to the right
 x_sticky_paper = [x_min] + x_sticky_paper + [x_max]
@@ -247,29 +277,15 @@ plt.savefig(os.path.splitext(model_filename)[0] + '.svg', format='svg', dpi=1200
 x_model = list(uniform_df.iloc[:, 0])
 y_model = list(uniform_df.iloc[:, 1])
 
-x_model, y_model = cdf_for_plot(y_model, x_model)
+
+
+
+
 
 # extend CDF to the left
 #shift = 20
 #x_min = x_model[0] - shift
 #x_max = x_model[-1] + shift
-x_model = [x_min] + x_model
-y_model = [0.0] + y_model
-x_model = x_model + [x_max]
-y_model = y_model + [1.0]
 
-fig, ax = plt.subplots()
+    
 
-ax.plot(x_sticky_paper, y_sticky_paper, color='black', label='Experiment')
-ax.plot(x_model, y_model, color='red', label='Model')
-
-ax.set_yticks([0.0, 1.0], minor=False)
-ax.set_yticks([0.2, 0.4, 0.6, 0.8], minor=True)
-ax.yaxis.set_minor_formatter(FormatStrFormatter('%.1f'))
-ax.yaxis.grid(True, which='major')
-ax.legend(loc='right')
-ax.set_xlabel('Number of splashed beads')
-ax.set_ylabel('Cumulative distribution function')
-
-plt.xlim(x_min, x_max)
-plt.savefig(os.path.splitext(model_filename)[0] + '_uniform.svg', format='svg', dpi=1200)
